@@ -1,0 +1,29 @@
+{
+  "name": "OrderNow",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node node_modules/react-native/local-cli/cli.js start",
+    "test": "jest"
+  },
+  "dependencies": {
+    "react": "16.3.1",
+    "react-native": "0.55.4",
+    "react-native-popup-dialog": "^0.16.4",
+    "react-redux": "^5.1.1",
+    "realm": "^2.20.0",
+    "redux": "^4.0.1"
+  },
+  "devDependencies": {
+    "babel-jest": "23.6.0",
+    "babel-preset-react-native": "4.0.1",
+    "jest": "23.6.0",
+    "react-native-drawer": "^2.5.1",
+    "react-native-tab-navigator": "^0.3.4",
+    "react-navigation": "^2.18.2",
+    "react-test-renderer": "16.3.1"
+  },
+  "jest": {
+    "preset": "react-native"
+  }
+}
