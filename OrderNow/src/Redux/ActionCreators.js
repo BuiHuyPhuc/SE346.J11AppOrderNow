@@ -69,3 +69,20 @@ export function onLoadListTable() {
 	return { type: 'LOAD_LIST_TABLE' };
 }
 ///////////////////////////////// Table //////////////////////////////////
+
+
+/////////////////////////////// Employee /////////////////////////////////
+// ---> Truyền dữ liệu vào popup bàn <---
+export function onPopupAddEmployee() {
+	return { type: 'POPUP_ADD_EMPLOYEE' };
+}
+
+export function onPopupUpdateDeleteEmployee(employee) {
+	return { type: 'POPUP_UPDATE_DELETE_EMPLOYEE', employee };
+}
+
+// ---> Xử lý lấy dữ liệu danh sách bàn <---
+export function onLoadListEmployee() {
+	return { type: 'LOAD_LIST_EMPLOYEE' };
+}
+/////////////////////////////// Employee /////////////////////////////////

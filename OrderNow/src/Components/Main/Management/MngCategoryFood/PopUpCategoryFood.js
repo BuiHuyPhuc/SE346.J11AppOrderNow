@@ -4,38 +4,49 @@ import {
 } from 'react-native';
 import Dialog, { DialogTitle } from 'react-native-popup-dialog';
 
-import { insertNewTable, deleteTable } from './../../../../Database/All_Schemas';
+import { insertNewCategoryFood, updateCategoryFood, deleteCategoryFood } from './../../../../Database/All_Schemas';
 
 import { connect } from 'react-redux';
-import { onCancelPopup } from './../../../../Redux/ActionCreators';
+import { onCancelPopup, onClickUpdate } from './../../../../Redux/ActionCreators';
 
-class PopUpTable extends Component {
+let monnuongIcon = require('./../../../../Media/Category/mon-nuong.png');
+
+class PopUpCategoryFood extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			idTable: ''
+			name: ''
 		};
 	}
 
-	onAdd(idTable) {
-		if(idTable == '')
+	onAdd(newCategoryFood) {
+		if(this.state.name == '')
 			return alert('Vui lòng điền đầy đủ thông tin!');
-		insertNewTable({
-	      id: parseInt(idTable)
+		insertNewCategoryFood({
+	      id: Math.floor(Date.now() / 1000),
+	      name: newCategoryFood.name,
+	      image: newCategoryFood.image
 	    })
-	    .then(table => alert(`Thêm bàn số ${table.id} thành công!`))
+	    .then(categoryFood => alert(`Thêm ${categoryFood.name} thành công!`))
 	    .catch(error => alert(`Thêm thất bại!`));
 		this.props.onCancelPopup();
 	}
 
-	onDelete(idTable) {
+	onUpdate(categoryFood) {
+		updateCategoryFood(categoryFood)
+	    .then(() => alert('Sửa thành công'))
+	    .catch(error => alert('Sửa thất bại'));
+		this.props.onCancelPopup();
+	}
+
+	onDelete(categoryFood) {
 		Alert.alert(
 			'Xóa',
-			`Xóa bàn số: ${idTable}`,
+			`Xóa loại món ăn: ${categoryFood.name}`,
 			[
 				{
 					text: 'Yes', onPress: () => {
-						deleteTable(idTable)
+						deleteCategoryFood(categoryFood.id)
 					    .then(() => alert('Xóa thành công'))
 					    .catch(error => alert('Xóa thất bại'));
 						this.props.onCancelPopup();
@@ -51,16 +62,23 @@ class PopUpTable extends Component {
 	}
 
 	render() {
-		const { idTable } = this.state;
-		const { title, table, isSave, isUpdate, visible, onCancelPopup } = this.props;
-		const { wrapDelete, btnFeature,
-				wrapDialog, textInput, wrapAllBtn, wrapBtn, btnText } = styles;
+		const { name } = this.state;
+		const { title, categoryFood, isSave, isUpdate, visible,
+				onCancelPopup, onClickUpdate } = this.props;
+		const { wrapUpdate_Delete, btnFeature,
+				wrapDialog, textInput, wrapBtnImage, imgLoaiMon, wrapAllBtn, wrapBtn, btnText } = styles;
 
-		const btnDelete = (
-			<View style={wrapDelete}>
+		const btnUpdate_delete = (
+			<View style={wrapUpdate_Delete}>
+				<TouchableOpacity
+	              style={btnFeature}
+	              onPress={() => onClickUpdate()}
+	            >
+	              <Text>U</Text>
+	            </TouchableOpacity>
 	            <TouchableOpacity
 	              style={btnFeature}
-	              onPress={() => this.onDelete(table.id)}
+	              onPress={() => this.onDelete({id: categoryFood.id, name})}
 	            >
 	              <Text>D</Text>
 	            </TouchableOpacity>
@@ -70,29 +88,44 @@ class PopUpTable extends Component {
 		return (
 			<Dialog
 				dialogTitle={<DialogTitle title={title} />}
-				width={0.8} height={isUpdate ? 230 : 180 }
-				onShow={() => table == null ? this.setState({ idTable: '' }) : this.setState({ idTable: table.id.toString() })}
+				width={0.8} height={isUpdate ? 300 : 250 }
+				onShow={() => categoryFood == null ? this.setState({ name: '' }) : this.setState({ name: categoryFood.name })}
 				visible={visible}
 			>
-				{isUpdate ? btnDelete : null}
+				{isUpdate ? btnUpdate_delete : null}
 
 				<View style={wrapDialog}>
 					<View pointerEvents={isSave ? "auto" : "none"}>
 						<TextInput
 							style={textInput}
-							placeholder="Nhập tên bàn mới, số"
+							placeholder="Nhập tên loại món ăn mới"
 							autoCapitalize="none"
 	              			underlineColorAndroid='transparent'
-							onChangeText={text => this.setState({ idTable: text })}
-							value={idTable}
+							onChangeText={text => this.setState({ name: text })}
+							value={name}
 						/>
+						<View style={wrapBtnImage}>
+							<TouchableOpacity
+								style={wrapBtn}
+								onPress={() => {}}
+							>
+								<Text style={btnText}>Chọn ảnh</Text>
+							</TouchableOpacity>
+							<Image 
+								style={imgLoaiMon}
+								source={monnuongIcon}
+							/>
+						</View>
 					</View>
 					
 					<View style={wrapAllBtn}>
 						<TouchableOpacity
 							style={wrapBtn}
 							disabled={!isSave}
-							onPress={() => this.onAdd(idTable)}
+							onPress={() => isUpdate ? 
+								this.onUpdate({ id: categoryFood.id, name, image: '' }) : 
+								this.onAdd({ name, image: '' })
+							}
 						>
 							<Text style={btnText}>Save</Text>
 						</TouchableOpacity>
@@ -111,19 +144,19 @@ class PopUpTable extends Component {
 
 function mapStateToProps(state) {
 	return {
-		title: state.popUpTable.title,
-		table: state.popUpTable.table,		
+		title: state.popUpCategoryFood.title,
+		categoryFood: state.popUpCategoryFood.categoryFood,		
 		isSave: state.showPopup.isSave,
 		isUpdate: state.showPopup.isUpdate,
 		visible: state.showPopup.visible,
 	};
 }
 
-export default connect(mapStateToProps, { onCancelPopup })(PopUpTable);
+export default connect(mapStateToProps, { onCancelPopup, onClickUpdate })(PopUpCategoryFood);
 
 const styles = StyleSheet.create({
   // ---> Update - Delete <---
-  wrapDelete: {
+  wrapUpdate_Delete: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',
@@ -149,6 +182,16 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderColor: '#2ABB9C',
     borderWidth: 1
+  },
+  wrapBtnImage: {
+  	flexDirection: 'row',
+  	alignItems: 'center',
+  	marginHorizontal: 20,
+  	marginBottom: 10,
+  },
+  imgLoaiMon: {
+  	width: 75,
+  	height: 50
   },
   wrapAllBtn: {
   	flexDirection: 'row',

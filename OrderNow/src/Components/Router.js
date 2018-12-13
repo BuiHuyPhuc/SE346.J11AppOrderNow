@@ -14,11 +14,11 @@ import Menu from './Header/Menu/Menu';
 import Info from './Header/Menu/Info';
 
 import Management from './Main/Management/Management';
-import MgnEmployee from './Main/Management/MgnEmployee';
-import MgnTable from './Main/Management/MngTable/MngTable';
-import MgnCategoryFood from './Main/Management/MgnCategoryFood/MgnCategoryFood';
-import MgnFood from './Main/Management/MgnFood/MgnFood';
-import MgnReport from './Main/Management/MgnReport';
+import MngEmployee from './Main/Management/MngEmployee/MngEmployee';
+import MngTable from './Main/Management/MngTable/MngTable';
+import MngCategoryFood from './Main/Management/MngCategoryFood/MngCategoryFood';
+import MngFood from './Main/Management/MngFood/MngFood';
+import MngReport from './Main/Management/MngReport';
 
 import homeIcon from './../Media/Icon/home.png';
 import orderIcon from './../Media/Icon/order.png';
@@ -49,11 +49,11 @@ export const BillStack = StackNavigator({
 
 export const ManagementStack = StackNavigator({
 	Screen_Management: Management,
-	Screen_Mng_Employee: MgnEmployee,
-	Screen_Mng_Table: MgnTable,
-	Screen_Mng_CategoryFood: MgnCategoryFood,
-	Screen_Mng_Food: MgnFood,	
-	Screen_Mng_Report: MgnReport
+	Screen_Mng_Employee: MngEmployee,
+	Screen_Mng_Table: MngTable,
+	Screen_Mng_CategoryFood: MngCategoryFood,
+	Screen_Mng_Food: MngFood,	
+	Screen_Mng_Report: MngReport
 }, {
 	headerMode: 'none'
 });

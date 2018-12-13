@@ -18,7 +18,7 @@ const { width, height } = Dimensions.get("window");
 let tableIcon = require('./../../../../Media/Temp/table.png');
 const imgTable = SourceImage(tableIcon);
 
-class MgnTable extends Component {
+class MngTable extends Component {
   constructor (props) {
     super(props);
     this.state = {
@@ -114,7 +114,7 @@ function mapStateToProps(state) {
 }
 
 export default connect(mapStateToProps, { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
-  onPopupAddTable, onPopupDeleteTable, onLoadListTable })(MgnTable);
+  onPopupAddTable, onPopupDeleteTable, onLoadListTable })(MngTable);
 
 const styles = StyleSheet.create({
   container: {

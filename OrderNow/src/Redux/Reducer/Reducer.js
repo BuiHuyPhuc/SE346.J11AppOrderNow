@@ -12,6 +12,9 @@ import listFoodReducer from './ListFoodReducer';
 import popUpTableReducer from './PopUpTableReducer';
 import listTableReducer from './ListTableReducer';
 
+import popUpEmployeeReducer from './PopUpEmployeeReducer';
+import listEmployeeReducer from './ListEmployeeReducer';
+
 const reducer = combineReducers({
 	chooseTable: chooseTableReducer,
 	showPopup: showPopupReducer,
@@ -21,6 +24,8 @@ const reducer = combineReducers({
 	listFood: listFoodReducer,
 	popUpTable: popUpTableReducer,
 	listTable: listTableReducer,
+	popUpEmployee: popUpEmployeeReducer,
+	listEmployee: listEmployeeReducer,
 });
 
 export default reducer;

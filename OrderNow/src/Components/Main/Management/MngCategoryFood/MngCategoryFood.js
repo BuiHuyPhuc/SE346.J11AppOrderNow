@@ -14,7 +14,7 @@ import PopUpCategoryFood from './PopUpCategoryFood';
 
 const { width, height } = Dimensions.get("window");
 
-class MgnCategoryFood extends Component {
+class MngCategoryFood extends Component {
   constructor (props) {
     super(props);
     this.state = {
@@ -123,7 +123,7 @@ function mapStateToProps(state) {
 }
 
 export default connect(mapStateToProps, { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
-  onPopupAddCategoryFood, onPopupUpdateDeleteCategoryFood, onLoadListCategoryFood })(MgnCategoryFood);
+  onPopupAddCategoryFood, onPopupUpdateDeleteCategoryFood, onLoadListCategoryFood })(MngCategoryFood);
 
 const styles = StyleSheet.create({
   container: {

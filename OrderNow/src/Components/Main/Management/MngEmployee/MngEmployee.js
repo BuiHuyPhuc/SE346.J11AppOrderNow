@@ -1,29 +1,46 @@
 import React, { Component } from 'react';
 import {
-  StyleSheet, Text, View, Dimensions, TouchableOpacity, Image, TextInput
+  StyleSheet, Text, View, Dimensions, TouchableOpacity, Image, TextInput, FlatList
 } from 'react-native';
 
-import HeaderBack from './../HeaderBack';
+import realm from './../../../../Database/All_Schemas';
+
+import { connect } from 'react-redux';
+import { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete, onLoadListEmployee,
+         onPopupAddEmployee, onPopupUpdateDeleteEmployee } from './../../../../Redux/ActionCreators';
+
+import HeaderBack from './../../HeaderBack';
+import PopUpEmployee from './PopUpEmployee';
 
 const { width, height } = Dimensions.get("window");
 
-export default class MgnEmployee extends Component {
+class MngEmployee extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      listEmployee: [],
       search: ''
     };
+    realm.addListener('change', () => {
+      this.onReloadData();
+    });
+  }
+
+  onReloadData() {
+    this.setState({ listEmployee: this.props.listEmployee });
+    this.props.onLoadListEmployee();    
   }
 
   render() {
-    const { search } = this.state;
-    const { navigation } = this.props;
+    const { search, listEmployee } = this.state;
+    const { navigation, onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
+            onPopupAddEmployee, onPopupUpdateDeleteEmployee } = this.props;
     const { container, wrapHeader, inputSearch, wrapFeature, btnFeature,
             wrapTable, headerTable, headerWrapChucVu, headerWrapTen, headerWrapSdt, txtHeader,
             wrapItem, txtChucVu, txtTen, txtSdt 
           } = styles;
     return (
-      <View style={ container }>
+      <View style={container}>
       <HeaderBack
           navigation={navigation}
           name="Management Employee"
@@ -40,7 +57,10 @@ export default class MgnEmployee extends Component {
           <View style={wrapFeature}>
             <TouchableOpacity
               style={btnFeature}
-              onPress={() => {}}
+              onPress={() => {                
+                onShowPopupAdd();
+                onPopupAddEmployee();
+              }}
             >
               <Text>+</Text>
             </TouchableOpacity>
@@ -69,26 +89,50 @@ export default class MgnEmployee extends Component {
             </View>           
           </View>
 
-          <View>
-            <View style={wrapItem}>
+          <FlatList
+            data={listEmployee}
+            renderItem={({item}) =>
+              <TouchableOpacity 
+                style={wrapItem}
+                onPress={() => {
+                  onShowPopupUpdateDelete();
+                  onPopupUpdateDeleteEmployee(item);
+                }}
+              >
               <View style={txtChucVu}>
-                <Text>Quản lý</Text>
+                <Text>{item.position}</Text>
               </View>
               <View style={txtTen}>
-                <Text>Bùi Huy Phúc</Text>
+                <Text>{item.name}</Text>
               </View>
               <View style={txtSdt}>
-                <Text>0914659369</Text>
-              </View>      
-            </View>
-
-          </View>  
+                <Text>{item.phone}</Text>
+              </View>       
+              </TouchableOpacity> 
+            }
+            keyExtractor={item => item.id.toString()}
+          />
         </View>
 
+        <PopUpEmployee />
       </View>
     );
   }
+
+  componentDidMount() {
+    this.onReloadData();
+  }
 }
+
+function mapStateToProps(state) {
+  console.log("listEmployee", state.listEmployee._55);
+  return {
+    listEmployee: state.listEmployee._55
+  };
+}
+
+export default connect(mapStateToProps, { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
+  onPopupAddEmployee, onPopupUpdateDeleteEmployee, onLoadListEmployee })(MngEmployee);
 
 const styles = StyleSheet.create({
   container: {

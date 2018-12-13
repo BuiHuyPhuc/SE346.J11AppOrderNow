@@ -121,7 +121,6 @@ export const deleteEmployee = employeeId => new Promise((resolve, reject) => {
     .then(realm => {
         realm.write(() => {
             let deletingEmployee = realm.objectForPrimaryKey(EMPLOYEE_SCHEMA, employeeId);
-            realm.delete(deletingEmployee.billDetails);
             realm.delete(deletingEmployee);
             resolve();
         });
