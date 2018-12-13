@@ -7,31 +7,12 @@ import {
 // import { queryAllCategoryFood } from '../../../Database/All_Schemas';
 
 import ComboboxTable from './ComboboxTable';
-import SourceImage from './SourceImage';
+import SourceImage from './../../../Api/SourceImage';
 
 let monnuongIcon = require('./../../../Media/Category/mon-nuong.png');
 const imgMonNuong = SourceImage(monnuongIcon);
 
 const { width, height } = Dimensions.get("window");
-
-// let FlatListItem=props=>{
-//   const {itemIndex,id,tenLoaiMonAn,hinh, onPressItem}=props;
-
-//   return(
-//     <TouchableOpacity onPress={ onPressItem} >
-//     <View  width={(screenWidth-20)/2}    height={screenHeight/4}   style={{ flexDirection: 'column' , backgroundColor: 'gray'}}>
-
-//       <Image style={ {margin:5, flex:(6/7)}}
-//       source={{uri: 'https://daynauan.info.vn/images/mon-viet/mon-suon-nuong.jpg'}}/>
-
-//       <View style={{  flex:1/7, backgroundColor:'green', alignItems:'center', padding:10}}>
-           
-//             <Text>{itemIndex}</Text>
-//      </View>
-//     </View>
-//     </TouchableOpacity>
-//   );
-// }
 
 export default class Home extends Component {
   constructor (props) {
@@ -195,36 +176,3 @@ const styles = StyleSheet.create({
     fontSize: 24
   }
 });
-
-/*
-<TouchableOpacity
-          onPress={()=>{
-              //Alert.alert("Clicked");
-            const newLoaiMonAn={
-              id: 93,
-              tenLoaiMonAn:"PPPPP",
-              hinh: "dsda",
-            };
-            insertNewLoaiMonAn(newLoaiMonAn).then().catch((error)=> {
-              Alert.alert("LLLL");});
-              console.log(`Item: `);
-            }
-          }
-        >
-          <Text>Thêm món ăn trong Code</Text>
-        </TouchableOpacity>
-                
-
-        <FlatList
-          data={this.state.loaiMonAn}
-          numColumns={2}
-          renderItem={({ item,index })=>
-            <FlatListItem  
-              {...item} 
-              itemIndex={index}
-              onPressItem={() => onCategoryDetail() }
-            />
-          }
-          keyExtractor={item => item.id.toString()}
-        />
-*/

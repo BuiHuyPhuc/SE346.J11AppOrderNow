@@ -47,8 +47,25 @@ export function onPopupUpdateDeleteFood(food) {
 	return { type: 'POPUP_UPDATE_DELETE_FOOD', food };
 }
 
-// ---> Xử lý lấy dữ liệu, thêm, xóa, sửa danh sách món ăn <---
+// ---> Xử lý lấy dữ liệu danh sách món ăn <---
 export function onLoadListFood() {
 	return { type: 'LOAD_LIST_FOOD' };
 }
 ////////////////////////////////// Food //////////////////////////////////
+
+
+///////////////////////////////// Table //////////////////////////////////
+// ---> Truyền dữ liệu vào popup bàn <---
+export function onPopupAddTable() {
+	return { type: 'POPUP_ADD_TABLE' };
+}
+
+export function onPopupDeleteTable(table) {
+	return { type: 'POPUP_DELETE_TABLE', table };
+}
+
+// ---> Xử lý lấy dữ liệu danh sách bàn <---
+export function onLoadListTable() {
+	return { type: 'LOAD_LIST_TABLE' };
+}
+///////////////////////////////// Table //////////////////////////////////

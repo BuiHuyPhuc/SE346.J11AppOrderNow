@@ -7,7 +7,7 @@ import {
 
 import HeaderBack from './../HeaderBack';
 import ComboboxTable from './ComboboxTable';
-import SourceImage from './SourceImage';
+import SourceImage from './../../../Api/SourceImage';
 
 let monnuongIcon = require('./../../../Media/Category/mon-nuong.png');
 const imgMonNuong = SourceImage(monnuongIcon);

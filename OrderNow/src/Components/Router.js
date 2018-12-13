@@ -15,7 +15,7 @@ import Info from './Header/Menu/Info';
 
 import Management from './Main/Management/Management';
 import MgnEmployee from './Main/Management/MgnEmployee';
-import MgnTable from './Main/Management/MngTable';
+import MgnTable from './Main/Management/MngTable/MngTable';
 import MgnCategoryFood from './Main/Management/MgnCategoryFood/MgnCategoryFood';
 import MgnFood from './Main/Management/MgnFood/MgnFood';
 import MgnReport from './Main/Management/MgnReport';

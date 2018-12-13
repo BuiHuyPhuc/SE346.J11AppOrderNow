@@ -168,7 +168,6 @@ export const deleteTable = tableId => new Promise((resolve, reject) => {
     .then(realm => {
         realm.write(() => {
             let deletingTable = realm.objectForPrimaryKey(TABLE_SCHEMA, tableId);
-            realm.delete(deletingTable.billDetails);
             realm.delete(deletingTable);
             resolve();
         });
