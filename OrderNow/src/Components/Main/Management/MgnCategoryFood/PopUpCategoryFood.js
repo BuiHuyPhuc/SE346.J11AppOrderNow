@@ -15,7 +15,6 @@ class PopUpCategoryFood extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			id: 0,
 			name: ''
 		};
 	}
@@ -25,7 +24,8 @@ class PopUpCategoryFood extends Component {
 			return alert('Vui lòng điền đầy đủ thông tin!');
 		insertNewCategoryFood({
 	      id: Math.floor(Date.now() / 1000),
-	      name: newCategoryFood.name
+	      name: newCategoryFood.name,
+	      image: ''
 	    })
 	    .then(categoryFood => alert(`Thêm ${categoryFood.name} thành công!`))
 	    .catch(error => alert(`Thêm thất bại!`));
@@ -40,7 +40,6 @@ class PopUpCategoryFood extends Component {
 	}
 
 	onDelete(categoryFood) {
-		const { onCancelPopup, onDeleteCategoryFood } = this.props;
 		Alert.alert(
 			'Xóa',
 			`Xóa loại món ăn: ${categoryFood.name}`,
@@ -50,7 +49,7 @@ class PopUpCategoryFood extends Component {
 						deleteCategoryFood(categoryFood.id)
 					    .then(() => alert('Xóa thành công'))
 					    .catch(error => alert('Xóa thất bại'));
-						onCancelPopup();
+						this.props.onCancelPopup();
 					}
 				},
 				{
@@ -89,7 +88,7 @@ class PopUpCategoryFood extends Component {
 		return (
 			<Dialog
 				dialogTitle={<DialogTitle title={title} />}
-				width={0.8} height={300}
+				width={0.8} height={isUpdate ? 300 : 250 }
 				onShow={() => categoryFood == null ? this.setState({ name: '' }) : this.setState({ name: categoryFood.name })}
 				visible={visible}
 			>
@@ -123,7 +122,10 @@ class PopUpCategoryFood extends Component {
 						<TouchableOpacity
 							style={wrapBtn}
 							disabled={!isSave}
-							onPress={() => isUpdate ? this.onUpdate({id: categoryFood.id, name, image: ''}) : this.onAdd({name})}
+							onPress={() => isUpdate ? 
+								this.onUpdate({ id: categoryFood.id, name, image: '' }) : 
+								this.onAdd({ name })
+							}
 						>
 							<Text style={btnText}>Save</Text>
 						</TouchableOpacity>
@@ -158,7 +160,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',
-    marginHorizontal: 20
+    marginHorizontal: 20,
+    marginVertical: 5
   },
   btnFeature: {
     backgroundColor: '#2ABB9C',
@@ -168,7 +171,7 @@ const styles = StyleSheet.create({
   },
   // ---> Add <---
   wrapDialog: {
-    marginTop: 10
+    marginTop: 5
   },
   textInput: {
     height: 45,
@@ -176,7 +179,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'whitesmoke',
     paddingLeft: 20,
     borderRadius: 20,
-    marginBottom: 20,
+    marginBottom: 10,
     borderColor: '#2ABB9C',
     borderWidth: 1
   },
@@ -184,7 +187,7 @@ const styles = StyleSheet.create({
   	flexDirection: 'row',
   	alignItems: 'center',
   	marginHorizontal: 20,
-  	marginBottom: 20,
+  	marginBottom: 10,
   },
   imgLoaiMon: {
   	width: 75,

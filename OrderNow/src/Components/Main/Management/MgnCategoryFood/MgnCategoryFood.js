@@ -98,7 +98,7 @@ class MgnCategoryFood extends Component {
                   <Text>{item.name}</Text>
                 </View>
                 <View style={txtSoLuong}>
-                  <Text>{item.foods.length}</Text>
+                  <Text>{item.image}</Text>
                 </View>       
               </TouchableOpacity> 
             }

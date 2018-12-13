@@ -32,10 +32,8 @@ export function onPopupUpdateDeleteCategoryFood(categoryFood) {
 
 // ---> Xử lý lấy dữ liệu danh sách loại món ăn <---
 export function onLoadListCategoryFood() {
-	console.log("ActionCreators");
 	return { type: 'LOAD_LIST_CATEGORYFOOD' };
 }
-
 ////////////////////////////// Category Food //////////////////////////////
 
 
@@ -50,15 +48,7 @@ export function onPopupUpdateDeleteFood(food) {
 }
 
 // ---> Xử lý lấy dữ liệu, thêm, xóa, sửa danh sách món ăn <---
-export function onAddNewFood(newFood, categoryFoodId) {
-	return { type: 'ADD_NEW_FOOD', newFood, categoryFoodId };
-}
-
-export function onUpdateFood(food) {
-	return { type: 'UPDATE_FOOD', food };
-}
-
-export function onDeleteFood(foodId) {
-	return { type: 'DELETE_FOOD', foodId };
+export function onLoadListFood() {
+	return { type: 'LOAD_LIST_FOOD' };
 }
 ////////////////////////////////// Food //////////////////////////////////

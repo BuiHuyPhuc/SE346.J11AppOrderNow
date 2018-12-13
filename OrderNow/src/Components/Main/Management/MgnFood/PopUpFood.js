@@ -4,12 +4,10 @@ import {
 } from 'react-native';
 import Dialog, { DialogTitle } from 'react-native-popup-dialog';
 
-import realm from './../../../../Database/All_Schemas';
-import { queryAllCategoryFood } from './../../../../Database/All_Schemas';
+import { insertNewFood, updateFood, deleteFood } from './../../../../Database/All_Schemas';
 
 import { connect } from 'react-redux';
-import { onCancelPopup, onClickUpdate, onAddNewFood, onUpdateFood, onDeleteFood,
-		 onLoadListCategoryFood } from './../../../../Redux/ActionCreators';
+import { onCancelPopup, onClickUpdate } from './../../../../Redux/ActionCreators';
 
 let monnuongIcon = require('./../../../../Media/Category/mon-nuong.png');
 
@@ -17,69 +15,61 @@ class PopUpFood extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			list: [],
+			listCategoryFood: this.props.listCategoryFood,
 			name: '',
 			price: '',
-			selectedCategoryFoodId: ''
+			selectedCategoryFoodId: null
 		};
+		console.log('List_categoryfood', this.state.listCategoryFood);
 	}
 
-	componentDidMount() {
-		queryAllCategoryFood()
-		.then(list => {
-			this.setState({ list })
-		})
-		.catch(error => this.setState({ list: [] }));
-	}
-
-	onAdd(newFood, categoryFoodId) {
-		const { name, price } = this.state;
-		const { onCancelPopup, onAddNewFood } = this.props;
-		if(name == '' || price == '')
+	onAdd(newFood) {
+		if(this.state.name == '' || this.state.price == '')
 			return alert('Vui lòng điền đầy đủ thông tin!');
-		console.log("CATEGORY_FOOD_ID", categoryFoodId)
-		onAddNewFood(newFood, categoryFoodId);
-		onCancelPopup();
+		insertNewFood({
+	      id: Math.floor(Date.now() / 1000),
+	      name: newFood.name,
+	      price: parseInt(newFood.price),
+	      image: newFood.image,
+	      idCategoryFood: newFood.idCategoryFood
+	    })
+	    .then(food => alert(`Thêm ${food.name} thành công!`))
+	    .catch(error => alert(`Thêm thất bại!`));
+		this.props.onCancelPopup();
 	}
 
-	// onUpdate(categoryFood) {
-	// 	const { onCancelPopup, onUpdateCategoryFood } = this.props;
-	// 	onUpdateCategoryFood(categoryFood)
-	// 	onCancelPopup();
-	// }
+	onUpdate(food) {
+		updateFood(food)
+	    .then(() => alert('Sửa thành công'))
+	    .catch(error => alert('Sửa thất bại'));
+		this.props.onCancelPopup();
+	}
 
-	// onDelete(categoryFood) {
-	// 	const { onCancelPopup, onDeleteCategoryFood } = this.props;
-	// 	Alert.alert(
-	// 		'Xóa',
-	// 		`Xóa loại món ăn: ${categoryFood.name}`,
-	// 		[
-	// 		{
-	// 				text: 'Yes', onPress: () => {
-	// 					onDeleteCategoryFood(categoryFood.id);
-	// 					onCancelPopup();
-	// 				}
-	// 			},
-	// 			{
-	// 				text: 'No', onPress: () => onCancelPopup(),
-	// 				style: 'cancel'
-	// 			}				
-	// 		],
-	// 		{ cancelable: true }
-	// 	);
-	// }
-
-	renderItem() {
-    	items = [];
-    	for(let item of this.state.listCategoryFood) {
-    		items.push(<Picker.Item key={item} value={item.id} label={item.name} />)
-    	}
-    	return items;
-    }
+	onDelete(food) {
+		Alert.alert(
+			'Xóa',
+			`Xóa món ăn: ${food.name}`,
+			[
+			{
+					text: 'Yes', onPress: () => {
+						deleteFood(food.id)
+					    .then(() => alert('Xóa thành công'))
+					    .catch(error => alert('Xóa thất bại'));
+						this.props.onCancelPopup();
+					}
+				},
+				{
+					text: 'No', onPress: () => {},
+					style: 'cancel'
+				}				
+			],
+			{ cancelable: true }
+		);
+	}
 
 	render() {
-		const { name, price, selectedCategoryFoodId } = this.state;
-		const { title, categoryFood, isSave, isUpdate, visible, chooseCategoryFoodId,
+		const { listCategoryFood, name, price, selectedCategoryFoodId } = this.state;
+		const { title, food, isSave, isUpdate, visible, chooseCategoryFoodId,
 				onCancelPopup, onClickUpdate } = this.props;
 		const { wrapUpdate_Delete, btnFeature, wrapDialog, textInput, cmbCategoryFood, 
 				wrapBtnImage, imgLoaiMon, wrapAllBtn, wrapBtn, btnText } = styles;
@@ -88,13 +78,13 @@ class PopUpFood extends Component {
 			<View style={wrapUpdate_Delete}>
 				<TouchableOpacity
 	              style={btnFeature}
-	              onPress={() => {}}
+	              onPress={() => onClickUpdate()}
 	            >
 	              <Text>U</Text>
 	            </TouchableOpacity>
 	            <TouchableOpacity
 	              style={btnFeature}
-	              onPress={() => {}}
+	              onPress={() => this.onDelete({id: food.id, name})}
 	            >
 	              <Text>D</Text>
 	            </TouchableOpacity>
@@ -104,8 +94,12 @@ class PopUpFood extends Component {
 		return (
 			<Dialog
 				dialogTitle={<DialogTitle title={title} />}
-				width={0.8} height={400}
-				//onShow={() => categoryFood == null ? this.setState({ name: '' }) : this.setState({ name: categoryFood.name })}
+				width={0.8} height={isUpdate ? 400 : 350}
+				onShow={() => food == null ? this.setState({ name: '', price: '' }) : this.setState({ 
+					name: food.name,
+					price: food.price.toString(),
+					selectedCategoryFoodId: food.idCategoryFood
+				})}
 				visible={visible}
 			>
 				{isUpdate ? btnUpdate_delete : null}
@@ -129,15 +123,16 @@ class PopUpFood extends Component {
 							value={price}
 						/>
 						<Picker
-					        selectedValue={selectedCategoryFoodId}
-					        style={cmbCategoryFood}
+							style={cmbCategoryFood}
+					        selectedValue={selectedCategoryFoodId}					        
 					        mode="dropdown"
-					        onValueChange={(itemValue, itemIndex) => {
-					        	this.setState({ selectedCategoryFoodId: itemValue });
-					        	console.log("ID", selectedCategoryFoodId);
-					        }}
+					        onValueChange={itemValue => this.setState({ selectedCategoryFoodId: itemValue})}
 					    >
-					    	{ this.renderItem() }
+					    	{ 
+					    		listCategoryFood.map(e => (					    			
+					    			<Picker.Item key={e.id} value={e.id} label={e.name} />
+					    		)) 
+					    	}
 					    </Picker>
 						<View style={wrapBtnImage}>
 							<TouchableOpacity
@@ -157,7 +152,10 @@ class PopUpFood extends Component {
 						<TouchableOpacity
 							style={wrapBtn}
 							disabled={!isSave}
-							onPress={() => this.onAdd({name, price}, selectedCategoryFoodId)}
+							onPress={() => isUpdate ?
+								this.onUpdate({ id:food.id , name, price: parseInt(price), image: '', idCategoryFood: selectedCategoryFoodId }) :
+								this.onAdd({ name, price, image: '', idCategoryFood: selectedCategoryFoodId })
+							}
 						>
 							<Text style={btnText}>Save</Text>
 						</TouchableOpacity>
@@ -172,6 +170,11 @@ class PopUpFood extends Component {
 			</Dialog>
 		);
 	}
+
+	componentDidMount() {
+		//set selectedCategoryFoodId = id của loại món ăn đầu tiên trong list
+		this.state.listCategoryFood.slice(0, 1).map(e => this.setState({ selectedCategoryFoodId: e.id }))
+	}
 }
 
 function mapStateToProps(state) {
@@ -180,12 +183,12 @@ function mapStateToProps(state) {
 		food: state.popUpFood.food,		
 		isSave: state.showPopup.isSave,
 		isUpdate: state.showPopup.isUpdate,
-		visible: state.showPopup.visible
+		visible: state.showPopup.visible,
+		listCategoryFood: state.listCategoryFood._55
 	};
 }
 
-export default connect(mapStateToProps, { onCancelPopup, onClickUpdate,
-	onAddNewFood, onUpdateFood, onDeleteFood })(PopUpFood);
+export default connect(mapStateToProps, { onCancelPopup, onClickUpdate })(PopUpFood);
 
 const styles = StyleSheet.create({
   // ---> Update - Delete <---
@@ -193,7 +196,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',
-    marginHorizontal: 20
+    marginHorizontal: 20,
+    marginVertical: 5
   },
   btnFeature: {
     backgroundColor: '#2ABB9C',
@@ -203,7 +207,7 @@ const styles = StyleSheet.create({
   },
   // ---> Add <---
   wrapDialog: {
-    marginTop: 10
+    marginTop: 5
   },
   textInput: {
     height: 45,
@@ -211,20 +215,20 @@ const styles = StyleSheet.create({
     backgroundColor: 'whitesmoke',
     paddingLeft: 20,
     borderRadius: 20,
-    marginBottom: 20,
+    marginBottom: 10,
     borderColor: '#2ABB9C',
     borderWidth: 1
   },
   cmbCategoryFood: {
   	height: 45,
     marginHorizontal: 20,
-    marginBottom: 20
+    marginBottom: 10
   },
   wrapBtnImage: {
   	flexDirection: 'row',
   	alignItems: 'center',
   	marginHorizontal: 20,
-  	marginBottom: 20,
+  	marginBottom: 10,
   },
   imgLoaiMon: {
   	width: 75,

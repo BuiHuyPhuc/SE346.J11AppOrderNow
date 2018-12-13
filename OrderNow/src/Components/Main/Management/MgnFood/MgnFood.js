@@ -4,11 +4,10 @@ import {
 } from 'react-native';
 
 import realm from './../../../../Database/All_Schemas';
-import { queryAllFood } from './../../../../Database/All_Schemas';
 
 import { connect } from 'react-redux';
 import { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
-         onPopupAddFood, onPopupUpdateDeleteFood } from './../../../../Redux/ActionCreators';
+         onPopupAddFood, onPopupUpdateDeleteFood, onLoadListFood } from './../../../../Redux/ActionCreators';
 
 import HeaderBack from './../../HeaderBack';
 import PopUpFood from './PopUpFood';
@@ -21,20 +20,21 @@ class MgnFood extends Component {
     this.state = {
       listFood: [],
       search: ''
-    };    
-    this.onReloadData();
+    };  
+
     realm.addListener('change', () => {
       this.onReloadData();
     });
   }
 
   onReloadData() {
-    queryAllFood()
-    .then(listFood => this.setState({ listFood }))
-    .catch(error => this.setState({ listFood: [] }));
+    this.setState({ listFood: this.props.listFood });
+    this.props.onLoadListFood();
   }
 
   render() {
+    
+
     const { search, listFood } = this.state;
     const { navigation, onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
             onPopupAddFood, onPopupUpdateDeleteFood } = this.props;
@@ -94,7 +94,7 @@ class MgnFood extends Component {
 
           <FlatList
             data={listFood}
-            renderItem={({item}) =>
+            renderItem={({item}) => 
               <TouchableOpacity
                 style={wrapItem}
                 onPress={() => {
@@ -109,7 +109,7 @@ class MgnFood extends Component {
                   <Text>{item.price}</Text>
                 </View>
                 <View style={txtLoai}>
-                  <Text>Món nướng</Text>
+                  <Text>{item.idCategoryFood}</Text>
                 </View>
               </TouchableOpacity> 
             }
@@ -121,10 +121,21 @@ class MgnFood extends Component {
       </View>
     );
   }
+
+  componentDidMount() {
+    this.onReloadData();
+  }
 }
 
-export default connect(null, { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
-  onPopupAddFood, onPopupUpdateDeleteFood })(MgnFood);
+function mapStateToProps(state) {
+  return {
+    listFood: state.listFood._55,
+    listCategoryFood: state.listCategoryFood._55
+  }
+}
+
+export default connect(mapStateToProps, { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
+  onPopupAddFood, onPopupUpdateDeleteFood, onLoadListFood })(MgnFood);
 
 const styles = StyleSheet.create({
   container: {

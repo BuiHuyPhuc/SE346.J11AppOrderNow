@@ -19,9 +19,8 @@ export const EmployeeSchema = {
         name:  'string',
         position: 'string',
         decentralization: { type: 'bool', default: false },
-        phone: 'string',
-        image: 'string?',
-        billDetails: { type:'list', objectType: BILL_DETAIL_SCHEMA}
+        phone: 'string?',
+        image: 'string?'
     }
 };
 
@@ -29,8 +28,7 @@ export const TableSchema = {
     name: TABLE_SCHEMA,
     primaryKey: 'id',
     properties: {
-        id: 'int',
-        billDetails: { type:'list', objectType: BILL_DETAIL_SCHEMA}
+        id: 'int'
     }
 };
 
@@ -40,8 +38,7 @@ export const CategoryFoodSchema = {
     properties: {
         id: 'int',
         name:  'string',
-        image: 'string?',
-        foods: { type:'list', objectType: FOOD_SCHEMA}
+        image: 'string?'
     }
 };
 
@@ -53,7 +50,7 @@ export const FoodSchema = {
         name: 'string',
         price: 'int',
         image: 'string?',
-        billDetails: { type:'list', objectType: BILL_DETAIL_SCHEMA}
+        idCategoryFood: 'int'
     }
 };
 
@@ -64,8 +61,7 @@ export const BillSchema = {
         id: 'int',
         status: { type: 'bool', default: false },
         time: 'date?',
-        total: { type: 'int', default: 0 },
-        billDetails: { type:'list', objectType: BILL_DETAIL_SCHEMA}
+        total: { type: 'int', default: 0 }
     }
 };
 
@@ -76,7 +72,11 @@ export const BillDetailSchema = {
         id: 'int',
         quantity: { type: 'int', default: 1 },
         status: { type: 'bool', default: false },
-        time: 'date'
+        time: 'date',
+        idEmployee: 'int',
+        idTable: 'int',
+        idFood: 'int',
+        idBill: 'int'
     }
 };
 
@@ -216,7 +216,11 @@ export const deleteCategoryFood = categoryFoodId => new Promise((resolve, reject
     .then(realm => {
         realm.write(() => {
             let deletingCategoryFood = realm.objectForPrimaryKey(CATEGORY_FOOD_SCHEMA, categoryFoodId);
-            realm.delete(deletingCategoryFood.foods);
+            let allFoods = realm.objects(FOOD_SCHEMA);
+            allFoods.map(e => {
+                if(e.idCategoryFood === categoryFoodId)
+                    realm.delete(e);
+            });
             realm.delete(deletingCategoryFood);
             resolve();
         });
@@ -235,13 +239,11 @@ export const queryAllCategoryFood = () => new Promise((resolve, reject) => {
 
 
 // -----------------------------------> FoodSchema <-----------------------------------
-export const insertNewFood = (newFood, categoryFoodId) => new  Promise((resolve, reject) => {
+export const insertNewFood = newFood => new  Promise((resolve, reject) => {
     Realm.open(databaseOptions)
     .then(realm => {
         realm.write(() => {
-            let categoryFood = realm.objectForPrimaryKey(CATEGORY_FOOD_SCHEMA, categoryFoodId);
             realm.create(FOOD_SCHEMA, newFood);
-            categoryFood.foods.push(newFood);
             resolve(newFood);
         });
     })
@@ -252,10 +254,13 @@ export const updateFood = food => new Promise((resolve, reject) => {
     Realm.open(databaseOptions)
     .then(realm => {
         realm.write(() => {
+            console.log("food", food);
             let updatingFood = realm.objectForPrimaryKey(FOOD_SCHEMA, food.id);
+            console.log("updatingFood", updatingFood);
             updatingFood.name = food.name;
             updatingFood.price = food.price;
             updatingFood.image = food.image;
+            updatingFood.idCategoryFood = food.idCategoryFood;
             resolve();
         });
     })
@@ -267,7 +272,6 @@ export const deleteFood = foodId => new Promise((resolve, reject) => {
     .then(realm => {
         realm.write(() => {
             let deletingFood = realm.objectForPrimaryKey(FOOD_SCHEMA, foodId);
-            realm.delete(deletingFood.billDetails);
             realm.delete(deletingFood);
             resolve();
         });
@@ -278,7 +282,7 @@ export const deleteFood = foodId => new Promise((resolve, reject) => {
 export const queryAllFood = () => new Promise((resolve, reject) => {
     Realm.open(databaseOptions)
     .then(realm => {
-        let allFoods = realm.objectForPrimaryKey(FOOD_SCHEMA);
+        let allFoods = realm.objects(FOOD_SCHEMA);
         resolve(allFoods);        
     })
     .catch(error => reject(error));
