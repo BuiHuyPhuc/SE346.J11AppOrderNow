@@ -1,5 +1,6 @@
 import { combineReducers } from 'redux';
 
+import employeeSignedInReducer from './EmployeeSignedInReducer';
 import signOutReducer from './SignOutReducer'
 import chooseTableReducer from './ChooseTableReducer';
 import showPopupReducer from './ShowPopupReducer';
@@ -9,6 +10,7 @@ import popUpTableReducer from './PopUpTableReducer';
 import popUpEmployeeReducer from './PopUpEmployeeReducer';
 
 const reducer = combineReducers({
+	employeeSignedIn: employeeSignedInReducer,
 	signOut: signOutReducer,
 	chooseTable: chooseTableReducer,
 	showPopup: showPopupReducer,

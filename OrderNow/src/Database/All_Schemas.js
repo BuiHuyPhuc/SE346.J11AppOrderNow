@@ -137,6 +137,20 @@ export const queryAllEmployee = () => new Promise((resolve, reject) => {
     .catch(error => reject(error));
 });
 
+export const signInEmployee = (username, password) => new Promise((resolve, reject) => {
+    Realm.open(databaseOptions)
+    .then(realm => {
+        let allEmployees = realm.objects(EMPLOYEE_SCHEMA);
+        let employee = null;
+        allEmployees.map(e => {
+            if(e.username === username && e.password === password)
+                employee = e;
+        })
+        resolve(employee);
+    })
+    .catch(error => reject(error));
+});
+
 
 // -----------------------------------> TableSchema <-----------------------------------
 export const insertNewTable = newTable => new  Promise((resolve, reject) => {
@@ -149,18 +163,6 @@ export const insertNewTable = newTable => new  Promise((resolve, reject) => {
     })
     .catch(error => reject(error));
 });
-
-// export const updateTable = table => new Promise((resolve,reject) => {
-//     Realm.open(databaseOptions)
-//     .then(realm => {
-//         realm.write(()=>{
-//             let updatingTable = realm.objectForPrimaryKey(TABLE_SCHEMA, table.id);
-//             updatingTable.id = table.id;
-//             resolve();
-//         });
-//     })
-//     .catch(error => reject(error));
-// });
 
 export const deleteTable = tableId => new Promise((resolve, reject) => {
     Realm.open(databaseOptions)

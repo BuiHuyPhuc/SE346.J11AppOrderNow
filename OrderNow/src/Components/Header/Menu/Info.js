@@ -1,25 +1,42 @@
 import React, { Component } from 'react';
 import {
-  StyleSheet, Text, View, TouchableOpacity, TextInput
+  StyleSheet, Text, View, TouchableOpacity, TextInput, Image
 } from 'react-native';
+
+import { connect } from 'react-redux';
+
+import { updateEmployee } from './../../../Database/All_Schemas';
 
 import HeaderBack from './../../Main/HeaderBack';
 
-export default class Info extends Component {
+let profileIcon = require('./../../../Media/Temp/profile.png');
+
+class Info extends Component {
   constructor(props) {
     super(props);
-    //const { name, address, phone } = this.props.navigation.state.params.user;
-    this.state = { 
-        txtTen: 'Bùi Huy Phúc', 
-        txtSdt: '0914.659.369',
-        txtCa: '1' 
+    const { employee } = this.props;
+    this.state = {
+      username: employee.username,
+      password: employee.password,
+      name: employee.name,
+      position: employee.position,
+      phone: employee.phone,
+      image: employee.image
     };
   }
 
+  onUpdate(employee) {
+    updateEmployee(employee)
+      .then(() => alert('Sửa thành công'))
+      .catch(error => alert('Sửa thất bại'));
+  }
+
   render() {
-    const { txtTen, txtSdt, txtCa } = this.state;
-    const { navigation } = this.props;
-    const { container, wrapper, textInput, btnChange, btnText } = styles;
+    const { username, password, name, position, phone, image } = this.state;
+    const { navigation, employee } = this.props;
+    const { container, wrapper, textInput, txtPosotion,
+            wrapBtnImage, btnChangeImage, imgProfile, btnChange, btnText,
+          } = styles;
     return (
       <View style={container}>
         <HeaderBack 
@@ -28,73 +45,140 @@ export default class Info extends Component {
         />
 
         <View style={wrapper}>
+          <Text style={txtPosotion}>Chức vụ: {position}</Text>
           <TextInput
               style={textInput}
-              placeholder="Enter your name"
+              placeholder="Nhập tài khoản của bạn"
               autoCapitalize="none"
+              editable={false}
               underlineColorAndroid='transparent'
-              value={txtTen}
-              onChangeText={text => this.setState({ ...this.state, txtTen: text })}
+              value={username}
+              onChangeText={text => this.setState({ username: text })}
           />
           <TextInput
               style={textInput}
-              placeholder="Enter your phone number"
+              placeholder="Nhập mật khẩu của bạn"
               autoCapitalize="none"
+              secureTextEntry
               underlineColorAndroid='transparent'
-              value={txtSdt}
-              onChangeText={text => this.setState({ ...this.state, txtSdt: text })}
+              value={password}
+              onChangeText={text => this.setState({ password: text })}
           />
           <TextInput
               style={textInput}
-              placeholder="Enter your shift"
+              placeholder="Nhập họ và tên của bạn"
               autoCapitalize="none"
               underlineColorAndroid='transparent'
-              value={txtCa}
-              onChangeText={text => this.setState({ ...this.state, txtCa: text })}
+              value={name}
+              onChangeText={text => this.setState({ name: text })}
           />
-          <TouchableOpacity 
-              style={btnChange}
+          <TextInput
+              style={textInput}
+              placeholder="Nhập số điện thoại của bạn"
+              autoCapitalize="none"
+              underlineColorAndroid='transparent'
+              value={phone}
+              onChangeText={text => this.setState({ phone: text })}
+          />
+          <View style={wrapBtnImage}>
+            <TouchableOpacity
+              style={btnChangeImage}
               onPress={() => {}}
-          >
-              <Text style={btnText}>Change your infomation</Text>
-          </TouchableOpacity>
+            >
+              <Text style={btnText}>Thay đổi ảnh đại diện</Text>
+            </TouchableOpacity>
+            <Image 
+              style={imgProfile}
+              source={profileIcon}
+            />
+          </View>
         </View>
+
+        <TouchableOpacity 
+          style={btnChange}
+          onPress={() => this.onUpdate({ 
+              id: employee.id, password, name, position, 
+              decentralization: position === "Quản lý" ? true : false,
+              phone, image
+            })
+          }
+        >
+          <Text style={btnText}>Lưu thông tin</Text>
+        </TouchableOpacity>
 
       </View>
     );
   }
 }
 
+function mapStateToProps(state) {
+  return {
+    employee: state.employeeSignedIn,
+  }
+}
+
+export default connect(mapStateToProps)(Info);
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1
+    flex: 1,
+    backgroundColor: 'whitesmoke',
+    borderRightWidth: 2,
+    borderColor: 'whitesmoke',
+    justifyContent: 'space-between'
   },
   wrapper: {
     flex: 10,
-    justifyContent: 'center' 
+    justifyContent: 'center',
+    marginHorizontal: 20
   },
   textInput: {
     height: 45,
-    marginHorizontal: 20,
     backgroundColor: 'whitesmoke',
     paddingLeft: 20,
     borderRadius: 20,
-    marginBottom: 20,
+    marginBottom: 10,
     borderColor: '#2ABB9C',
     borderWidth: 1
   },
-  btnChange: {
-    marginHorizontal: 20,
+  txtPosotion: {
+    fontSize: 24,
+    marginBottom: 10,
+    color: 'black'
+  },
+  wrapBtnImage: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginVertical: 10
+  },
+  btnChangeImage: {
+    marginHorizontal: 5,
     backgroundColor: '#2ABB9C',
     borderRadius: 20,
+    width: 190,
     height: 45,
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'stretch'
   },
+  imgProfile: {
+    width: 75,
+    height: 50,
+    resizeMode: 'stretch'
+  },
+  btnChange: {
+    backgroundColor: '#2ABB9C',
+    borderRadius: 20,
+    height: 45,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'stretch',
+    marginHorizontal: 20,
+    marginBottom: 20
+  },
   btnText: {
     color: 'whitesmoke', 
     fontWeight: '600', 
     paddingHorizontal: 20
-  },
+  }
 });

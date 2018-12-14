@@ -1,4 +1,9 @@
-// ---> Đăng xuất - đăng nhập <---
+// ---> Đăng nhập <---
+export function onEmployeeSignedIn(employee) {
+	return { type: 'EMPLOYEE_SIGNED_IN', employee };
+}
+
+// ---> Đăng xuất <---
 export function onSignOut(navigation) {
 	return { type: 'SIGN_OUT', navigation };
 }

@@ -127,7 +127,7 @@ class PopUpEmployee extends Component {
 						/>
 						<TextInput
 							style={textInput}
-							placeholder="Nhập tên nhân viên mới"
+							placeholder="Nhập họ và tên nhân viên mới"
 							autoCapitalize="none"
 	              			underlineColorAndroid='transparent'
 							onChangeText={text => this.setState({ name: text })}

@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 
 import realm from './../../../../Database/All_Schemas';
-import { queryAllFood } from './../../../../Database/All_Schemas';
+import { queryAllFood, queryAllCategoryFood } from './../../../../Database/All_Schemas';
 
 import { connect } from 'react-redux';
 import { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,

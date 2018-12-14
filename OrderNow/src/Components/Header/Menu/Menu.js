@@ -9,8 +9,8 @@ import profileIcon from './../../../Media/Temp/profile.png';
 
 class Menu extends Component {
   render() {
-    const { navigation, signOut } = this.props;
-    const { container, imgProfile, wrapLogin, txtTen, btnSignIn, btnText } = styles;
+    const { navigation, signOut, employeeSignedIn } = this.props;
+    const { container, imgProfile, wrapLogin, txtTen, btnWrap, btnText } = styles;
     return (
       <View style={container}>
         <Image 
@@ -19,17 +19,17 @@ class Menu extends Component {
         />
 
         <View style={wrapLogin}>
-          <Text style={txtTen}>Bùi Huy Phúc</Text>
+          <Text style={txtTen}>{employeeSignedIn.name}</Text>
           
           <View>          
             <TouchableOpacity 
-              style={btnSignIn}
+              style={btnWrap}
               onPress={() => navigation.navigate('Screen_Info')}
             >
-              <Text style={btnText}>Change Info</Text>
+              <Text style={btnText}>Profile</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={btnSignIn}
+              style={btnWrap}
               onPress={() => signOut.goBack()}         
             >
               <Text style={btnText}>Sign out</Text>
@@ -45,6 +45,7 @@ class Menu extends Component {
 
 function mapStateToProps(state) {
   return {
+    employeeSignedIn: state.employeeSignedIn,
     signOut: state.signOut
   }
 }
@@ -54,7 +55,7 @@ export default connect(mapStateToProps)(Menu);
 const styles = StyleSheet.create({
   container: {
     flex: 1, 
-    backgroundColor: '#2ABB9C',
+    backgroundColor: 'whitesmoke',
     borderRightWidth: 2,
     borderColor: 'whitesmoke',
     alignItems: 'center'
@@ -71,19 +72,21 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   txtTen: {
-    fontSize: 24, 
-    color: 'whitesmoke'
+    fontSize: 32,
+    color: 'black'
   },
-  btnSignIn: {
-    height: 60,
+  btnWrap: {
+    backgroundColor: '#2ABB9C',
+    borderRadius: 20,
+    marginVertical: 10,
     width: 280,
-    backgroundColor: 'whitesmoke',
+    height: 55,
+    alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 5,
-    marginBottom: 10,
-    paddingLeft: 10
+    alignSelf: 'stretch'
   },
   btnText: {
-    fontSize: 24
+    color: 'whitesmoke',
+    fontSize: 26,
   }
 });
