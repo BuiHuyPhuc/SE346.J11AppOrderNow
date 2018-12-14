@@ -4,6 +4,7 @@ import {
 } from 'react-native';
 
 import realm from './../../../../Database/All_Schemas';
+import { queryAllCategoryFood } from './../../../../Database/All_Schemas';
 
 import { connect } from 'react-redux';
 import { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete, onLoadListCategoryFood,
@@ -21,14 +22,16 @@ class MngCategoryFood extends Component {
       listCategoryFood: [],
       search: ''
     };
+    this.onReloadData();
     realm.addListener('change', () => {
-      this.onReloadData();
+      this.onReloadData();           
     });
   }
 
   onReloadData() {
-    this.setState({ listCategoryFood: this.props.listCategoryFood });
-    this.props.onLoadListCategoryFood();    
+    queryAllCategoryFood()
+    .then(listCategoryFood => this.setState({ listCategoryFood }))
+    .catch(error => this.setState({ listCategoryFood: [] }));
   }
   
   render() {
@@ -110,20 +113,10 @@ class MngCategoryFood extends Component {
       </View>
     );
   }
-
-  componentDidMount() {
-    this.onReloadData();
-  }
 }
 
-function mapStateToProps(state) {
-  return {
-    listCategoryFood: state.listCategoryFood._55
-  };
-}
-
-export default connect(mapStateToProps, { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
-  onPopupAddCategoryFood, onPopupUpdateDeleteCategoryFood, onLoadListCategoryFood })(MngCategoryFood);
+export default connect(null, { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
+  onPopupAddCategoryFood, onPopupUpdateDeleteCategoryFood })(MngCategoryFood);
 
 const styles = StyleSheet.create({
   container: {

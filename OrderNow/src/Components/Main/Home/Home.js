@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import {
-  StyleSheet, Text, View, TouchableOpacity, Alert, FlatList, Image, Dimensions, TextInput
+  StyleSheet, Text, View, TouchableOpacity, Alert, FlatList, Image, Dimensions, TextInput, Picker
 } from 'react-native';
 
-// import realm from '../../../Database/All_Schemas';
-// import { queryAllCategoryFood } from '../../../Database/All_Schemas';
+import realm from './../../../Database/All_Schemas';
+import { queryAllCategoryFood } from './../../../Database/All_Schemas';
 
 import ComboboxTable from './ComboboxTable';
 import SourceImage from './../../../Api/SourceImage';
@@ -18,29 +18,26 @@ export default class Home extends Component {
   constructor (props) {
     super(props);
     this.state = {
-        //listCategoryFood: [],
-        search: '',
+      listCategoryFood: [],
+      search: '',
     };
-    // this.reloadData();
-    // realm.addListener('change', () => {
-    //     this.reloadData();
-    //     console.log('Realm changed reloadData');
-    // })
+    this.onReloadData();
+    realm.addListener('change', () => {
+      this.onReloadData();           
+    });
   }
 
-  // reloadData = () => {
-  //   queryAllCategoryFood()
-  //   .then(listCategoryFood => this.setState({ listCategoryFood }))
-  //   .catch(error => this.setState({listCategoryFood: [] }));
-    
-  //   console.log('reloadData', this.state.listCategoryFood);
-  // }
+  onReloadData() {
+    queryAllCategoryFood()
+    .then(listCategoryFood => this.setState({ listCategoryFood }))
+    .catch(error => this.setState({ listCategoryFood: [] }));
+  }
 
   render() {
-    const { search } = this.state;
-    const { navigation } = this.props;
+    const { search, listTable, listCategoryFood } = this.state;
+    const { navigate } = this.props.navigation;
     const { container, wrapHeader, inputSearch, wrapAllFeature, wrapFeature, btnFeature,
-            wrapListCategory, wrapItemCategory, wrapText, txtNameCategory 
+            wrapItemCategory, wrapText, txtNameCategory 
           } = styles;
     return (
       <View style={container}>
@@ -49,8 +46,14 @@ export default class Home extends Component {
             style={inputSearch}
             placeholder="Search CategoryFood and Food"
             underlineColorAndroid='transparent'
+            onChangeText={text => {
+              this.setState({ search: text });
+              if(text == '')
+                this.onReloadData();
+              else
+                this.setState({ listCategoryFood: [] }); 
+            }}
             value={search}
-            onChangeText={text => this.setState({ search: text })}
           />
           
           <View style={wrapAllFeature}>
@@ -74,60 +77,32 @@ export default class Home extends Component {
         </View>
 
 
-        <View style={wrapListCategory}>
-          <View style={wrapItemCategory}>
-            <TouchableOpacity
-              style={{ width: imgMonNuong.imgWidth }}
-              onPress={() => navigation.navigate('Screen_CategoryDetail')}>
-              <Image
-                style={{ width: imgMonNuong.imgWidth, height: imgMonNuong.imgHeight }}
-                source={monnuongIcon}
-              >                            
-              </Image>
-            </TouchableOpacity>
-            <View style={wrapText}>
-              <Text style={txtNameCategory}>Món Nướng</Text>
-            </View>
-          </View>
-
-          <View style={wrapItemCategory}>
-            <TouchableOpacity
-              style={{ width: imgMonNuong.imgWidth }}
-              onPress={() => navigation.navigate('Screen_CategoryDetail')}>
-              <Image
-                style={{ width: imgMonNuong.imgWidth, height: imgMonNuong.imgHeight }}
-                source={monnuongIcon}
-              >                            
-              </Image>
-            </TouchableOpacity>
-            <View style={wrapText}>
-              <Text style={txtNameCategory}>Món Nướng</Text>
-            </View>
-          </View>
-
-          <View style={wrapItemCategory}>
-            <TouchableOpacity
-              style={{ width: imgMonNuong.imgWidth }}
-              onPress={() => navigation.navigate('Screen_CategoryDetail')}>
-              <Image
-                style={{ width: imgMonNuong.imgWidth, height: imgMonNuong.imgHeight }}
-                source={monnuongIcon}
-              >                            
-              </Image>
-            </TouchableOpacity>
-            <View style={wrapText}>
-              <Text style={txtNameCategory}>Món Nướng</Text>
-            </View>
-          </View>
-        </View>
+        <FlatList
+          data={listCategoryFood}
+          numColumns={2}
+          renderItem={({item}) =>
+            <View style={wrapItemCategory}>
+              <TouchableOpacity
+                style={{ width: imgMonNuong.imgWidth }}
+                onPress={() => navigate('Screen_CategoryDetail', { categoryFoodId: item.id })}
+              >
+                <Image
+                  style={{ width: imgMonNuong.imgWidth, height: imgMonNuong.imgHeight }}
+                  source={monnuongIcon}
+                />                            
+              </TouchableOpacity>
+              <View style={wrapText}>
+                <Text style={txtNameCategory}>{item.name}</Text>
+              </View>
+            </View> 
+          }
+          keyExtractor={item => item.id.toString()}
+        />
 
       </View>
     );
   }
 }
-
-// const categoryWidth = (width - 20) / 2;
-// const categoryImageHeight = (categoryWidth / source.width) * source.height; 
 
 const styles = StyleSheet.create({
   container: {
@@ -135,7 +110,8 @@ const styles = StyleSheet.create({
   },
   // ---> Header <---
   wrapHeader: {
-    paddingHorizontal: 10
+    paddingHorizontal: 10,
+    marginBottom: 5,
   },
   inputSearch: {
     width: width - 20,
@@ -159,12 +135,7 @@ const styles = StyleSheet.create({
     height: 32
   },
   // ---> List Category <---
-  wrapListCategory: {
-    flexDirection: 'row',
-    flexWrap: 'wrap'
-  },
   wrapItemCategory: {
-    marginTop: 10,
     paddingHorizontal: 5
   },
   wrapText: {

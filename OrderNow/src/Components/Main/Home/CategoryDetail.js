@@ -2,8 +2,11 @@ import React, { Component } from 'react';
 import {
   StyleSheet, Text, View, TouchableOpacity,Alert, FlatList, Image, Dimensions, TextInput
 } from 'react-native';
-// import realm from '../../../Database/All_Schemas';
-// import { queryAllFoodByCategoryFood } from '../../../Database/All_Schemas';
+
+import realm from './../../../Database/All_Schemas';
+import { queryAllFoodByCategoryFoodId } from './../../../Database/All_Schemas';
+
+import { connect } from 'react-redux';
 
 import HeaderBack from './../HeaderBack';
 import ComboboxTable from './ComboboxTable';
@@ -14,64 +17,28 @@ const imgMonNuong = SourceImage(monnuongIcon);
 
 const { width, height } = Dimensions.get("window")
 
-/*class FlatListMonAnItem extends Component{
-  constructor(props)
-  {
-    super(props);
-    this.state={
-      soLuong:0,
-    };
-  }
-  render() {
-    return(
-      
-      <View style={{width:screenWidth-20, height:screenHeight/4, flexDirection: 'row',backgroundColor: 'gray',
-              padding:5}}>
-                  <Image style={{ flex:(2/4)}}
-                    source={{uri: 'https://daynauan.info.vn/images/mon-viet/mon-suon-nuong.jpg'}}/>
-                  <View style={{ flex:3/6, flexDirection:'column', backgroundColor:'green', alignItems:'center',
-              padding:10}}>
-                          <Text>{this.props.monAnItem.tenMonAn}</Text>
-                          <Text>{this.props.monAnItem.giaMonAn}</Text>
-                          <View style={{ flex:3/6, flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
-                          <TouchableOpacity style={{ flex:1/4}} onPress={() => {
-                              if (this.state.soLuong>0) 
-                                   this.setState({soLuong:this.state.soLuong-1});                                
-                                }}>
-                              <Text style={{fontSize:30}}>-</Text>
-                            </TouchableOpacity >
-
-                            <Text style={{ flex:1/2}}>Số lượng: {this.state.soLuong}</Text>
-  
-                           <TouchableOpacity style={{ flex:1/4}}  onPress={() => {
-                                   this.setState({soLuong:this.state.soLuong+1});
-                                }}>
-                              <Text style={{fontSize:30}}>+</Text>
-                            </TouchableOpacity>
-                          </View>
-                          
-                          <TouchableOpacity   onPress={() => {
-                                   //insertMonAnToLoaiMonAn(this.props.monAnItem,97);
-                                }}>
-                              <Text >Thêm món</Text>
-                            </TouchableOpacity>
-                  </View>
-              </View>
-    );
-  }
-}
-*/
-export default class CategoryDetail extends Component {
+class CategoryDetail extends Component {
   constructor (props) {
     super(props);
     this.state = {
-        search: ''
+      listFood: [],
+      search: ''
     };
+    this.onReloadData();
+    realm.addListener('change', () => {
+      this.onReloadData();
+    })
+  }
+
+  onReloadData() {
+    queryAllFoodByCategoryFoodId(this.props.navigation.state.params.categoryFoodId)
+    .then(listFood => this.setState({ listFood }))
+    .catch(error => this.setState({ listFood: [] }));
   }
 
   render() {
-    const { search } = this.state;
-    const { navigation } = this.props;
+    const { search, listFood } = this.state;
+    const { navigation, table } = this.props;
     const { container, wrapHeader, inputSearch, wrapAllFeature, wrapFeature, btnFeature,
             wrapListFood, wrapItemFood, wrapInfoFood, txtFood, wrapSoLuongFood, btnFood 
           } = styles;
@@ -89,11 +56,17 @@ export default class CategoryDetail extends Component {
             placeholder="Search"
             underlineColorAndroid='transparent'
             value={search}
-            onChangeText={text => this.setState({ search: text })}
+            onChangeText={text => {
+              this.setState({ search: text });
+              if(text == '')
+                this.onReloadData();
+              else
+                this.setState({ listFood: [] });
+            }}
           />
 
           <View style={wrapAllFeature}>
-            <ComboboxTable />
+            <Text style={{ fontSize: 24 }}>Bàn số {table}</Text>
 
             <View style={wrapFeature}>
               <TouchableOpacity
@@ -113,76 +86,58 @@ export default class CategoryDetail extends Component {
         </View>
 
 
-        <View style={wrapListFood}>
-          <View style={wrapItemFood}>
-            <Image
-              style={{ width: imgMonNuong.imgWidth, height: imgMonNuong.imgHeight }} 
-              source={monnuongIcon}
-            />
-            <View style={wrapInfoFood}>
-              <Text style={txtFood}>Tên món</Text>
-              <Text style={txtFood}>Giá</Text>
-              <View style={wrapSoLuongFood}>
+        <FlatList
+          style={wrapListFood}
+          data={listFood}
+          renderItem={({item}) =>
+            <View style={wrapItemFood}>
+              <Image
+                style={{ width: imgMonNuong.imgWidth, height: imgMonNuong.imgHeight }} 
+                source={monnuongIcon}
+              />
+              
+              <View style={wrapInfoFood}>
+                <Text style={txtFood}>{item.name}</Text>
+                <Text style={txtFood}>{item.price}</Text>
+                <View style={wrapSoLuongFood}>
+                  <TouchableOpacity
+                    style={[btnFood, { width: 30 }]}
+                    onPress={() => {}}
+                  >
+                    <Text style={txtFood}>-</Text>
+                  </TouchableOpacity>
+                  <Text style={txtFood}>SL</Text>
+                  <TouchableOpacity
+                    style={[btnFood, { width: 30 }]}
+                    onPress={() => {}}
+                  >
+                    <Text style={txtFood}>+</Text>
+                  </TouchableOpacity>
+                </View>
                 <TouchableOpacity
-                  style={[btnFood, { width: 30 }]}
-                  onPress={() => {}}
+                  style={[btnFood, { width: imgMonNuong.imgWidth, backgroundColor: '#B0B0B0' }]}
+                  onPress={() => console.log("table", table)}
                 >
-                  <Text style={txtFood}>-</Text>
-                </TouchableOpacity>
-                <Text style={txtFood}>SL</Text>
-                <TouchableOpacity
-                  style={[btnFood, { width: 30 }]}
-                  onPress={() => {}}
-                >
-                  <Text style={txtFood}>+</Text>
-                </TouchableOpacity>
-              </View>
-              <TouchableOpacity
-                style={[btnFood, { width: imgMonNuong.imgWidth, backgroundColor: '#B0B0B0' }]}
-                onPress={() => {}}
-              >
-                <Text style={txtFood}>Thêm món</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View style={wrapItemFood}>
-            <Image
-              style={{ width: imgMonNuong.imgWidth, height: imgMonNuong.imgHeight }} 
-              source={monnuongIcon}
-            />
-            <View style={wrapInfoFood}>
-              <Text style={txtFood}>Tên món</Text>
-              <Text style={txtFood}>Giá</Text>
-              <View style={wrapSoLuongFood}>
-                <TouchableOpacity
-                  style={[btnFood, { width: 30 }]}
-                  onPress={() => {}}
-                >
-                  <Text style={txtFood}>-</Text>
-                </TouchableOpacity>
-                <Text style={txtFood}>SL</Text>
-                <TouchableOpacity
-                  style={[btnFood, { width: 30 }]}
-                  onPress={() => {}}
-                >
-                  <Text style={txtFood}>+</Text>
+                  <Text style={txtFood}>Thêm món</Text>
                 </TouchableOpacity>
               </View>
-              <TouchableOpacity
-                style={[btnFood, { width: imgMonNuong.imgWidth, backgroundColor: '#B0B0B0' }]}
-                onPress={() => {}}
-              >
-                <Text style={txtFood}>Thêm món</Text>
-              </TouchableOpacity>
-            </View>
-          </View>          
-        </View>          
+            </View> 
+          }
+          keyExtractor={item => item.id.toString()}
+        />        
         
       </View>
     );
   }
 }
+
+function mapStatetoProps(state) {
+  return {
+    table: state.chooseTable
+  };
+}
+
+export default connect(mapStatetoProps)(CategoryDetail);
 
 const styles = StyleSheet.create({
   container: {
@@ -190,7 +145,8 @@ const styles = StyleSheet.create({
   },
   // ---> Header <---
   wrapHeader: {
-    paddingHorizontal: 10
+    paddingHorizontal: 10,
+    marginBottom: 5
   },
   inputSearch: {
     width: width - 20,
@@ -218,8 +174,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5
   },
   wrapItemFood: {    
-    marginTop: 10,
-    flexDirection: 'row'
+    flexDirection: 'row',
+    marginTop: 5
   },
   wrapInfoFood: {
     marginLeft: 10,
@@ -237,34 +193,3 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   }
 });
-
-// <TouchableOpacity
-//           onPress={() => {
-//               //Alert.alert("Clicked");
-//             const newMonAn = {
-//               id: 5,
-//               tenMonAn:"Sườn rammmm",
-//               giaMonAn: 60000,
-//             };
-//             insertNewMonAn(newMonAn).then()
-//             .catch(error => Alert.alert("LLLL"));
-//             console.log(`Item: `);        
-//           }
-//         }
-//         >
-//           <Text>Thêm món ăn trong Code</Text>
-//         </TouchableOpacity>
-
-        
-//         <FlatList
-//           data={this.state.monAn}
-//           numColumns={1}
-//           renderItem={({item,index}) =>
-//             <FlatListMonAnItem
-//               monAnItem={item} 
-//               itemIndex={index}
-//               onPressItem={() => alert(`You pressed item`)}
-//             />
-//           }
-//           keyExtractor = {item => item.id.toString()}
-//         />

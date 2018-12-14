@@ -48,7 +48,10 @@ class PopUpCategoryFood extends Component {
 					text: 'Yes', onPress: () => {
 						deleteCategoryFood(categoryFood.id)
 					    .then(() => alert('Xóa thành công'))
-					    .catch(error => alert('Xóa thất bại'));
+					    .catch(error => {
+					    	alert('Xóa thất bại');
+					    	console.log("error", error);
+					    });
 						this.props.onCancelPopup();
 					}
 				},

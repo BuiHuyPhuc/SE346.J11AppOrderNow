@@ -3,6 +3,9 @@ import {
 	StyleSheet, View, Text, Picker
 } from 'react-native';
 
+import realm from './../../../Database/All_Schemas';
+import { queryAllTable } from './../../../Database/All_Schemas';
+
 import { connect } from 'react-redux';
 import { onChooseTable } from './../../../Redux/ActionCreators';
 
@@ -10,41 +13,45 @@ class ComboboxTable extends Component {
 	constructor (props) {
 	    super(props);
 	    this.state = {
-	    	listTable: ['1', '2', '3', '4', '5'],
-	        chooseTable: ''
-	    }
+	    	listTable: [],
+	    	selectedTable: ''
+	    };
+	    this.onReloadData();
+	    realm.addListener('change', () => {
+	      this.onReloadData();    
+	    });
     }
 
-    componentDidMount() {
-    	this.setState({ chooseTable: this.props.table });
-    }
-
-    renderItem() {
-    	items = [];
-    	for(let item of this.state.listTable) {
-    		itemText = "Bàn " + item;
-    		items.push(<Picker.Item key={item} value={item} label={itemText} />)
-    	}
-    	return items;
-    }
+    onReloadData() {
+	    queryAllTable()
+	    .then(listTable => this.setState({ listTable }))
+	    .catch(error => this.setState({ listTable: [] }));
+	}
 
 	render() {
-		const { chooseTable } = this.state;
+		const { listTable, selectedTable } = this.state;
 		const { container } = styles;
 		return(
 			<Picker
-		        selectedValue={chooseTable}
-		        style={container}
-		        prompt="Chọn bàn"
+				style={container}
+		        selectedValue={selectedTable}
 		        mode="dropdown"
-		        onValueChange={(itemValue, itemIndex) => {
-		        	this.setState({ chooseTable: itemValue });
+		        onValueChange={itemValue => {
+		        	this.setState({ selectedTable: itemValue });
 		        	this.props.onChooseTable(itemValue);
 		        }}
 		    >
-		    	{ this.renderItem() }
+		    	{ 
+		    		listTable != null ? listTable.map(table => (				    			
+		    			<Picker.Item key={table.id} value={table.id} label={"Bàn số " + table.id.toString()} />
+		    		)) : null
+		    	}
 		    </Picker>
 		);
+	}
+
+	componentDidMount() {
+		this.setState({ selectedTable: this.props.table })
 	}
 }
 
@@ -58,7 +65,7 @@ export default connect(mapStatetoProps, { onChooseTable })(ComboboxTable);
 
 const styles = StyleSheet.create({
 	container: {
-		width: 100,
+		width: 120,
     	height: 32,
 	}
 });

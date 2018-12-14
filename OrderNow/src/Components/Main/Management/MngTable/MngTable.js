@@ -4,9 +4,10 @@ import {
 } from 'react-native';
 
 import realm from './../../../../Database/All_Schemas';
+import { queryAllTable } from './../../../../Database/All_Schemas';
 
 import { connect } from 'react-redux';
-import { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete, onLoadListTable,
+import { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
          onPopupAddTable, onPopupDeleteTable } from './../../../../Redux/ActionCreators';
 
 import HeaderBack from './../../HeaderBack';
@@ -25,14 +26,16 @@ class MngTable extends Component {
       listTable: [],
       search: ''
     };
+    this.onReloadData();
     realm.addListener('change', () => {
-      this.onReloadData();
+      this.onReloadData();    
     });
   }
-
+  
   onReloadData() {
-    this.setState({ listTable: this.props.listTable });
-    this.props.onLoadListTable();    
+    queryAllTable()
+    .then(listTable => this.setState({ listTable }))
+    .catch(error => this.setState({ listTable: [] }));
   }
   
   render() {
@@ -101,20 +104,10 @@ class MngTable extends Component {
       </View>
     );
   }
-
-  componentDidMount() {
-    this.onReloadData();
-  }
 }
 
-function mapStateToProps(state) {
-  return {
-    listTable: state.listTable._55
-  };
-}
-
-export default connect(mapStateToProps, { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
-  onPopupAddTable, onPopupDeleteTable, onLoadListTable })(MngTable);
+export default connect(null, { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
+  onPopupAddTable, onPopupDeleteTable })(MngTable);
 
 const styles = StyleSheet.create({
   container: {
@@ -122,7 +115,8 @@ const styles = StyleSheet.create({
   },
   // ---> Header <---
   wrapHeader: {
-    paddingHorizontal: 10
+    paddingHorizontal: 10,
+    marginBottom: 5
   },
   inputSearch: {
     width: width - 20,
@@ -145,7 +139,6 @@ const styles = StyleSheet.create({
   },
   // ---> List Table <---
   wrapItemTable: {
-    marginTop: 5,
     paddingHorizontal: 5
   },
   wrapText: {

@@ -3,11 +3,13 @@ import {
   StyleSheet, Text, View, TouchableOpacity, Image
 } from 'react-native';
 
+import { connect } from 'react-redux';
+
 import profileIcon from './../../../Media/Temp/profile.png';
 
-export default class Menu extends Component {
+class Menu extends Component {
   render() {
-    const { navigate } = this.props.navigation;
+    const { navigation, signOut } = this.props;
     const { container, imgProfile, wrapLogin, txtTen, btnSignIn, btnText } = styles;
     return (
       <View style={container}>
@@ -22,13 +24,13 @@ export default class Menu extends Component {
           <View>          
             <TouchableOpacity 
               style={btnSignIn}
-              onPress={() => navigate('Screen_Info')}
+              onPress={() => navigation.navigate('Screen_Info')}
             >
               <Text style={btnText}>Change Info</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={btnSignIn}
-              onPress={() => {}}         
+              onPress={() => signOut.goBack()}         
             >
               <Text style={btnText}>Sign out</Text>
             </TouchableOpacity>
@@ -40,6 +42,14 @@ export default class Menu extends Component {
     );
   }
 }
+
+function mapStateToProps(state) {
+  return {
+    signOut: state.signOut
+  }
+}
+
+export default connect(mapStateToProps)(Menu);
 
 const styles = StyleSheet.create({
   container: {

@@ -215,10 +215,21 @@ export const deleteCategoryFood = categoryFoodId => new Promise((resolve, reject
         realm.write(() => {
             let deletingCategoryFood = realm.objectForPrimaryKey(CATEGORY_FOOD_SCHEMA, categoryFoodId);
             let allFoods = realm.objects(FOOD_SCHEMA);
+            let allFoodOfCategoryFood = [];
+
+            // Duyệt tất cả món ăn và lấy ra những món ăn nào thuộc loại món ăn cần xóa
             allFoods.map(e => {
                 if(e.idCategoryFood === categoryFoodId)
-                    realm.delete(e);
+                    allFoodOfCategoryFood.push(e);                 
             });
+
+            // Xóa những món ăn thuộc loại món ăn cần xóa
+            for(var index in allFoodOfCategoryFood) {
+                let deletingFood = allFoodOfCategoryFood[index];
+                realm.delete(deletingFood);
+            }
+
+            // Xóa loại món ăn
             realm.delete(deletingCategoryFood);
             resolve();
         });
@@ -286,11 +297,18 @@ export const queryAllFood = () => new Promise((resolve, reject) => {
     .catch(error => reject(error));
 });
 
-export const queryAllFoodByCategoryFood = categoryFoodId => new Promise((resolve, reject) => {
+export const queryAllFoodByCategoryFoodId = categoryFoodId => new Promise((resolve, reject) => {
     Realm.open(databaseOptions)
     .then(realm => {
-        let categoryFood = realm.objectForPrimaryKey(CATEGORY_FOOD_SCHEMA, categoryFoodId);
-        resolve(categoryFood.foods);        
+        let allFoods = realm.objects(FOOD_SCHEMA);
+        let allFoodOfCategoryFood = [];
+        // Duyệt tất cả món ăn và lấy ra những món ăn nào thuộc loại món ăn
+        allFoods.map(e => {
+            if(e.idCategoryFood === categoryFoodId)
+                allFoodOfCategoryFood.push(e);                 
+        });
+
+        resolve(allFoodOfCategoryFood);        
     })
     .catch(error => reject(error));
 });

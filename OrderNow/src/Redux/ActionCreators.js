@@ -1,3 +1,8 @@
+// ---> Đăng xuất - đăng nhập <---
+export function onSignOut(navigation) {
+	return { type: 'SIGN_OUT', navigation };
+}
+
 // ---> Chọn bàn <---
 export function onChooseTable(table) {
 	return { type: 'CHOSEN_TABLE', table };
@@ -29,11 +34,6 @@ export function onPopupAddCategoryFood() {
 export function onPopupUpdateDeleteCategoryFood(categoryFood) {
 	return { type: 'POPUP_UPDATE_DELETE_CATEGORYFOOD', categoryFood };
 }
-
-// ---> Xử lý lấy dữ liệu danh sách loại món ăn <---
-export function onLoadListCategoryFood() {
-	return { type: 'LOAD_LIST_CATEGORYFOOD' };
-}
 ////////////////////////////// Category Food //////////////////////////////
 
 
@@ -45,11 +45,6 @@ export function onPopupAddFood() {
 
 export function onPopupUpdateDeleteFood(food) {
 	return { type: 'POPUP_UPDATE_DELETE_FOOD', food };
-}
-
-// ---> Xử lý lấy dữ liệu danh sách món ăn <---
-export function onLoadListFood() {
-	return { type: 'LOAD_LIST_FOOD' };
 }
 ////////////////////////////////// Food //////////////////////////////////
 
@@ -63,11 +58,6 @@ export function onPopupAddTable() {
 export function onPopupDeleteTable(table) {
 	return { type: 'POPUP_DELETE_TABLE', table };
 }
-
-// ---> Xử lý lấy dữ liệu danh sách bàn <---
-export function onLoadListTable() {
-	return { type: 'LOAD_LIST_TABLE' };
-}
 ///////////////////////////////// Table //////////////////////////////////
 
 
@@ -79,10 +69,5 @@ export function onPopupAddEmployee() {
 
 export function onPopupUpdateDeleteEmployee(employee) {
 	return { type: 'POPUP_UPDATE_DELETE_EMPLOYEE', employee };
-}
-
-// ---> Xử lý lấy dữ liệu danh sách bàn <---
-export function onLoadListEmployee() {
-	return { type: 'LOAD_LIST_EMPLOYEE' };
 }
 /////////////////////////////// Employee /////////////////////////////////

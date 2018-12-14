@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
 import { Dimensions, Image } from 'react-native';
 import {
-	StackNavigator, createBottomTabNavigator
+	StackNavigator, createBottomTabNavigator, createStackNavigator
 } from 'react-navigation';
+
+import SignIn from './SignIn';
+import AppOrderNow from './AppOrderNow';
 
 import Home from './Main/Home/Home';
 import CategoryDetail from './Main/Home/CategoryDetail';
@@ -27,27 +30,34 @@ import managementIcon from './../Media/Icon/management.png';
 
 const { height } = Dimensions.get('window');
 
-export const HomeStack = StackNavigator({
+export const SignInStack = createStackNavigator({
+	Screen_SignIn: SignIn,
+	Screen_AppOrderNow: AppOrderNow
+}, {
+	headerMode: 'none'
+});
+
+export const HomeStack = createStackNavigator({
 	Screen_Home: Home,
 	Screen_CategoryDetail: CategoryDetail
 }, {
 	headerMode: 'none'
 });
 
-export const OrderStack = StackNavigator({
+export const OrderStack = createStackNavigator({
 	Screen_Order: Order
 }, {
 	headerMode: 'none'
 });
 
-export const BillStack = StackNavigator({
+export const BillStack = createStackNavigator({
 	Screen_Bill: Bill,
 	Screen_BillDetail: BillDetail
 }, {
 	headerMode: 'none'
 });
 
-export const ManagementStack = StackNavigator({
+export const ManagementStack = createStackNavigator({
 	Screen_Management: Management,
 	Screen_Mng_Employee: MngEmployee,
 	Screen_Mng_Table: MngTable,
@@ -58,7 +68,7 @@ export const ManagementStack = StackNavigator({
 	headerMode: 'none'
 });
 
-export const MenuStack = StackNavigator({
+export const MenuStack = createStackNavigator({
 	Screen_Menu: Menu,
 	Screen_Info: Info
 }, {

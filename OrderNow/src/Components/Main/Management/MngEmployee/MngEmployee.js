@@ -4,9 +4,10 @@ import {
 } from 'react-native';
 
 import realm from './../../../../Database/All_Schemas';
+import { queryAllEmployee } from './../../../../Database/All_Schemas';
 
 import { connect } from 'react-redux';
-import { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete, onLoadListEmployee,
+import { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
          onPopupAddEmployee, onPopupUpdateDeleteEmployee } from './../../../../Redux/ActionCreators';
 
 import HeaderBack from './../../HeaderBack';
@@ -21,14 +22,16 @@ class MngEmployee extends Component {
       listEmployee: [],
       search: ''
     };
+    this.onReloadData();
     realm.addListener('change', () => {
-      this.onReloadData();
+      this.onReloadData();    
     });
   }
 
   onReloadData() {
-    this.setState({ listEmployee: this.props.listEmployee });
-    this.props.onLoadListEmployee();    
+    queryAllEmployee()
+    .then(listEmployee => this.setState({ listEmployee }))
+    .catch(error => this.setState({ listEmployee: [] }));
   }
 
   render() {
@@ -118,21 +121,10 @@ class MngEmployee extends Component {
       </View>
     );
   }
-
-  componentDidMount() {
-    this.onReloadData();
-  }
 }
 
-function mapStateToProps(state) {
-  console.log("listEmployee", state.listEmployee._55);
-  return {
-    listEmployee: state.listEmployee._55
-  };
-}
-
-export default connect(mapStateToProps, { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
-  onPopupAddEmployee, onPopupUpdateDeleteEmployee, onLoadListEmployee })(MngEmployee);
+export default connect(null, { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
+  onPopupAddEmployee, onPopupUpdateDeleteEmployee })(MngEmployee);
 
 const styles = StyleSheet.create({
   container: {

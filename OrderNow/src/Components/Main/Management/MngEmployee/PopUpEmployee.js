@@ -102,6 +102,7 @@ class PopUpEmployee extends Component {
 					this.setState({ username: employee.username, password: employee.password, name: employee.name, selectedPositon: employee.position })}
 				visible={visible}
 			>
+			
 				{isUpdate ? btnUpdate_delete : null}
 
 				<View style={wrapDialog}>
@@ -157,6 +158,7 @@ class PopUpEmployee extends Component {
 							/>
 						</View>
 					</View>
+
 					
 					<View style={wrapAllBtn}>
 						<TouchableOpacity
@@ -183,6 +185,7 @@ class PopUpEmployee extends Component {
 							<Text style={btnText}>Cancel</Text>
 						</TouchableOpacity>
 					</View>
+
 				</View>
 			</Dialog>
 		);

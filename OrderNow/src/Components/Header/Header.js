@@ -1,21 +1,24 @@
 import React, { Component } from 'react';
 import {
-	StyleSheet,
-	Text,
-	View,
-	TouchableOpacity,
-	Dimensions,
-	Image,
+	StyleSheet, Text, View, TouchableOpacity, Dimensions, Image
 } from 'react-native';
+
+import { connect } from 'react-redux';
+import { onSignOut } from './../../Redux/ActionCreators'
 
 import menuIcon from './../../Media/Icon/menu.png';
 import logoIcon from './../../Media/Icon/logo.png';
 
 const { height } = Dimensions.get('window');
 
-export default class Header extends Component {
+class Header extends Component {
+	constructor(props) {
+		super(props);
+		this.props.onSignOut(this.props.navigation);
+	}
+
 	render() {
-		const { onOpen } = this.props;
+		const { onOpen, navigation } = this.props;
 		const { wrapper, row, titleStyle } = styles;
 		return (
 			<View style={wrapper}>
@@ -30,6 +33,8 @@ export default class Header extends Component {
 		);
 	}
 }
+
+export default connect(null, { onSignOut })(Header);
 
 const styles = StyleSheet.create({
 	wrapper: { 

@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 import Dialog, { DialogTitle } from 'react-native-popup-dialog';
 
-import { insertNewFood, updateFood, deleteFood } from './../../../../Database/All_Schemas';
+import { queryAllCategoryFood, insertNewFood, updateFood, deleteFood } from './../../../../Database/All_Schemas';
 
 import { connect } from 'react-redux';
 import { onCancelPopup, onClickUpdate } from './../../../../Redux/ActionCreators';
@@ -15,12 +15,18 @@ class PopUpFood extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			listCategoryFood: this.props.listCategoryFood,
+			listCategoryFood: [],
 			name: '',
 			price: '',
 			selectedCategoryFoodId: null
 		};
-		console.log('List_categoryfood', this.state.listCategoryFood);
+		this.onLoadListCategoryFood();
+	}
+
+	onLoadListCategoryFood() {
+	   	queryAllCategoryFood()
+	    .then(listCategoryFood => this.setState({ listCategoryFood }))
+	    .catch(error => this.setState({ listCategoryFood: [] }));
 	}
 
 	onAdd(newFood) {
@@ -184,7 +190,6 @@ function mapStateToProps(state) {
 		isSave: state.showPopup.isSave,
 		isUpdate: state.showPopup.isUpdate,
 		visible: state.showPopup.visible,
-		listCategoryFood: state.listCategoryFood._55
 	};
 }
 

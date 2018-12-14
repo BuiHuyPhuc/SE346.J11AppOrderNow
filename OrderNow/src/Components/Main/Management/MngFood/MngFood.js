@@ -4,10 +4,11 @@ import {
 } from 'react-native';
 
 import realm from './../../../../Database/All_Schemas';
+import { queryAllFood } from './../../../../Database/All_Schemas';
 
 import { connect } from 'react-redux';
 import { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
-         onPopupAddFood, onPopupUpdateDeleteFood, onLoadListFood } from './../../../../Redux/ActionCreators';
+         onPopupAddFood, onPopupUpdateDeleteFood } from './../../../../Redux/ActionCreators';
 
 import HeaderBack from './../../HeaderBack';
 import PopUpFood from './PopUpFood';
@@ -21,20 +22,19 @@ class MngFood extends Component {
       listFood: [],
       search: ''
     };  
-
+    this.onReloadData();
     realm.addListener('change', () => {
-      this.onReloadData();
+      this.onReloadData();    
     });
   }
 
   onReloadData() {
-    this.setState({ listFood: this.props.listFood });
-    this.props.onLoadListFood();
+    queryAllFood()
+    .then(listFood => this.setState({ listFood }))
+    .catch(error => this.setState({ listFood: [] }));
   }
 
   render() {
-    
-
     const { search, listFood } = this.state;
     const { navigation, onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
             onPopupAddFood, onPopupUpdateDeleteFood } = this.props;
@@ -121,21 +121,10 @@ class MngFood extends Component {
       </View>
     );
   }
-
-  componentDidMount() {
-    this.onReloadData();
-  }
 }
 
-function mapStateToProps(state) {
-  return {
-    listFood: state.listFood._55,
-    listCategoryFood: state.listCategoryFood._55
-  }
-}
-
-export default connect(mapStateToProps, { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
-  onPopupAddFood, onPopupUpdateDeleteFood, onLoadListFood })(MngFood);
+export default connect(null, { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
+  onPopupAddFood, onPopupUpdateDeleteFood })(MngFood);
 
 const styles = StyleSheet.create({
   container: {
