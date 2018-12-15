@@ -1,6 +1,6 @@
 import Realm from 'realm';
 
-import getFormattedDate from './../Api/FormattedDate.js';
+import { getFormattedDate } from './../Api/FormattedDateTime.js';
 
 export const EMPLOYEE_SCHEMA = "Employee";
 export const TABLE_SCHEMA = "Table";
@@ -342,6 +342,16 @@ export const updateBill = bill => new Promise((resolve,reject) => {
     .catch(error => reject(error));
 });
 
+
+export const queryAllBill = () => new Promise((resolve, reject) => {
+    Realm.open(databaseOptions)
+    .then(realm => {
+        let allBills = realm.objects(BILL_SCHEMA);
+        resolve(allBills);        
+    })
+    .catch(error => reject(error));
+});
+
 export const filterBillByStatus = status => new Promise((resolve,reject) => {
     Realm.open(databaseOptions)
     .then(realm => {
@@ -351,21 +361,64 @@ export const filterBillByStatus = status => new Promise((resolve,reject) => {
     .catch(error => reject(error));
 });
 
+export const tableStatus = tableId => new Promise((resolve,reject) => {
+    Realm.open(databaseOptions)
+    .then(realm => {
+        // Lọc tất cả những hóa đơn chưa thanh toán
+        let filteredBills = realm.objects(BILL_SCHEMA).filtered(`status = false`);
+        
+        // Lọc tất cả những chi tiết hóa đơn theo số bàn và hóa đơn chưa thanh toán
+        if(filteredBills.length > 0) {
+            filteredBills.map(e => {
+                let filteredBillDetail = realm.objects(BILL_DETAIL_SCHEMA)
+                    .filtered(`idBill = ${e.id} AND idTable = ${tableId}`);
+                if(filteredBillDetail.length > 0) {
+                    filteredBillDetail.map(e => {
+                        return resolve(e.idBill);
+                    })                    
+                }
+            })
+        }
 
-// -----------------------------------> BillDetailSchema <-----------------------------------
-export const insertNewBillDetail = (newBillDetail, employeeId, tableId, foodId, billId) => new  Promise((resolve, reject) => {
+        resolve(null);        
+    })
+    .catch(error => reject(error));
+});
+
+export const insertNewBillDetailOnBillOld = newBillDetail => new  Promise((resolve, reject) => {
     Realm.open(databaseOptions)
     .then(realm => {
         realm.write(() => {
-            let employee = realm.objectForPrimaryKey(EMPLOYEE_SCHEMA, employeeId);
-            let table = realm.objectForPrimaryKey(TABLE_SCHEMA, tableId);
-            let food = realm.objectForPrimaryKey(FOOD_SCHEMA, foodId);
-            let bill = realm.objectForPrimaryKey(BILL_SCHEMA, billId);
             realm.create(BILL_DETAIL_SCHEMA, newBillDetail);
-            employeeId.billDetails.push(newBillDetail);
-            table.billDetails.push(newBillDetail);
-            food.billDetails.push(newBillDetail);
-            bill.billDetails.push(newBillDetail);
+            resolve(newBillDetail);
+        });
+    })
+    .catch(error => reject(error));
+});
+
+export const deleteAllBillAndBillDetail = () => new Promise((resolve, reject) => {
+    Realm.open(databaseOptions)
+    .then(realm => {
+        realm.write(() => {
+            let allBillDetails = realm.objects(BILL_DETAIL_SCHEMA);
+            realm.delete(allBillDetails);
+
+            let allBills = realm.objects(BILL_SCHEMA);
+            realm.delete(allBills);
+            
+            resolve();
+        });
+    })
+    .catch(error => reject(error));
+});
+
+
+// -----------------------------------> BillDetailSchema <-----------------------------------
+export const insertNewBillDetail = newBillDetail => new  Promise((resolve, reject) => {
+    Realm.open(databaseOptions)
+    .then(realm => {
+        realm.write(() => {
+            realm.create(BILL_DETAIL_SCHEMA, newBillDetail);
             resolve(newBillDetail);
         });
     })
@@ -386,10 +439,11 @@ export const updateBillDetail = billDetail => new Promise((resolve,reject) => {
     .catch(error => reject(error));
 });
 
-export const billDetailOfTable = tableId => new Promise((resolve,reject) => {
-    Realm.open(databaseOptions).then(realm=>{
-        let table = realm.objectForPrimaryKey(TABLE_SCHEMA, tableId);
-        resolve(table.billDetails);        
+export const queryAllBillDetail = () => new Promise((resolve, reject) => {
+    Realm.open(databaseOptions)
+    .then(realm => {
+        let allBillDetails = realm.objects(BILL_DETAIL_SCHEMA);
+        resolve(allBillDetails);        
     })
     .catch(error => reject(error));
 });

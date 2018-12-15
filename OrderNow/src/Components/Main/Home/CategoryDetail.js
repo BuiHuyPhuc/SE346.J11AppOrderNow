@@ -4,13 +4,15 @@ import {
 } from 'react-native';
 
 import realm from './../../../Database/All_Schemas';
-import { queryAllFoodByCategoryFoodId } from './../../../Database/All_Schemas';
+import { queryAllFoodByCategoryFoodId, insertNewBill, queryAllBill,
+  insertNewBillDetail, queryAllBillDetail, tableStatus, deleteAllBillAndBillDetail } from './../../../Database/All_Schemas';
 
 import { connect } from 'react-redux';
 
 import HeaderBack from './../HeaderBack';
 import ComboboxTable from './ComboboxTable';
 import SourceImage from './../../../Api/SourceImage';
+import { getFormattedDate, getFormattedTime } from './../../../Api/FormattedDateTime';
 
 let monnuongIcon = require('./../../../Media/Category/mon-nuong.png');
 const imgMonNuong = SourceImage(monnuongIcon);
@@ -32,13 +34,95 @@ class CategoryDetail extends Component {
 
   onReloadData() {
     queryAllFoodByCategoryFoodId(this.props.navigation.state.params.categoryFoodId)
-    .then(listFood => this.setState({ listFood }))
+    .then(list => {
+      this.setState({ listFood: [] });
+      list.map(e => {
+        this.setState({ listFood: this.state.listFood.concat({ food: e, quantity: 1 }) })
+      })
+    })
     .catch(error => this.setState({ listFood: [] }));
   }
 
+  //////////////////// Tăng - giảm số lượng món cần gọi ////////////////////
+  onIncrease(itemId) {
+    const newListFood = this.state.listFood.map(e => {
+      if(e.food.id !== itemId)
+        return e;
+      return { food: e.food, quantity: e.quantity + 1 };
+    })
+    this.setState({ listFood: newListFood });
+  }
+
+  onDecrease(itemId) {
+    const newListFood = this.state.listFood.map(e => {
+      if(e.food.id !== itemId)
+        return e;
+      return { food: e.food, quantity: e.quantity <= 1 ? 1 : e.quantity - 1 };
+    })
+    this.setState({ listFood: newListFood  });
+  }
+  //////////////////// Tăng - giảm số lượng món cần gọi ////////////////////
+
+  //Tạo hóa đơn mới khi bàn trống gọi món
+  onCreateNewBill(item) {
+    insertNewBill({
+      id: Math.floor(Date.now() / 1000)
+    })
+    .then(newBill => {
+      insertNewBillDetail({
+        id: Math.floor(Date.now() / 1000),
+        quantity: item.quantity,
+        status: false,
+        time: new Date(),
+        idEmployee: this.props.employee.id,
+        idTable: this.props.table,
+        idFood: item.food.id,
+        idBill: newBill.id
+      })
+      .then(newBillDetail => alert(`Thêm ${item.food.name} số lượng ${item.quantity} thành công`))
+      .catch(error => alert('ONCREATEBILLDETAIL - Thêm thất bại'));
+    })
+    .catch(error => alert('ONCREATEBILL - Thêm thất bại'));
+  }
+
+  //Thêm món vào hóa đơn khi bàn đang sử dụng gọi thêm món
+  onAddBillOld(item, idBill) {
+    insertNewBillDetail({
+      id: Math.floor(Date.now() / 1000),
+      quantity: item.quantity,
+      status: false,
+      time: new Date(),
+      idEmployee: this.props.employee.id,
+      idTable: this.props.table,
+      idFood: item.food.id,
+      idBill: idBill
+    })
+    .then(newBillDetail => alert(`Thêm ${item.food.name} số lượng ${item.quantity} thành công`))
+    .catch(error => alert('ONCREATEBILLDETAIL - Thêm thất bại'));
+  }
+
+  onShowBill() {
+    queryAllBill()
+    .then(listBill => console.log("listBill", listBill))
+    .catch(error => alert('Xem listBill thất bại'));
+  }
+
+  onShowBillDetail() {
+    queryAllBillDetail()
+    .then(listBillDetal => console.log("listBillDetal", listBillDetal))
+    .catch(error => alert('Xem listBillDetal thất bại'));
+  }
+
+  //Xử lý của button Thêm món
+  onInsertOrder(item) {
+    tableStatus(this.props.table)
+    .then(idBill => idBill === null ? this.onCreateNewBill(item) : this.onAddBillOld(item, idBill))
+    .catch(error => alert('onInsertOrder thất bại'));
+  }
+
   render() {
-    const { search, listFood } = this.state;
-    const { navigation, table } = this.props;
+    const { listFood, search, quantity } = this.state;
+    const { navigation, table, employee } = this.props;
     const { container, wrapHeader, inputSearch, wrapAllFeature, wrapFeature, btnFeature,
             wrapListFood, wrapItemFood, wrapInfoFood, txtFood, wrapSoLuongFood, btnFood 
           } = styles;
@@ -71,13 +155,13 @@ class CategoryDetail extends Component {
             <View style={wrapFeature}>
               <TouchableOpacity
                 style={btnFeature}
-                onPress={() => {}}
+                onPress={() => this.onShowBill()}
               >
                 <Text>a</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={btnFeature}
-                onPress={() => {}}
+                onPress={() => this.onShowBillDetail()}
               >
                 <Text>a</Text>
               </TouchableOpacity>
@@ -97,33 +181,33 @@ class CategoryDetail extends Component {
               />
               
               <View style={wrapInfoFood}>
-                <Text style={txtFood}>{item.name}</Text>
-                <Text style={txtFood}>{item.price}</Text>
+                <Text style={txtFood}>{item.food.name}</Text>
+                <Text style={txtFood}>Đơn giá: {item.food.price} VNĐ</Text>
                 <View style={wrapSoLuongFood}>
                   <TouchableOpacity
                     style={[btnFood, { width: 30 }]}
-                    onPress={() => {}}
+                    onPress={() => this.onDecrease(item.food.id)}
                   >
                     <Text style={txtFood}>-</Text>
                   </TouchableOpacity>
-                  <Text style={txtFood}>SL</Text>
+                  <Text style={txtFood}>{item.quantity}</Text>
                   <TouchableOpacity
                     style={[btnFood, { width: 30 }]}
-                    onPress={() => {}}
+                    onPress={() => this.onIncrease(item.food.id)}
                   >
                     <Text style={txtFood}>+</Text>
                   </TouchableOpacity>
                 </View>
                 <TouchableOpacity
                   style={[btnFood, { width: imgMonNuong.imgWidth, backgroundColor: '#B0B0B0' }]}
-                  onPress={() => console.log("table", table)}
+                  onPress={() => this.onInsertOrder(item)}
                 >
                   <Text style={txtFood}>Thêm món</Text>
                 </TouchableOpacity>
               </View>
             </View> 
           }
-          keyExtractor={item => item.id.toString()}
+          keyExtractor={item => item.food.id.toString()}
         />        
         
       </View>
@@ -133,6 +217,7 @@ class CategoryDetail extends Component {
 
 function mapStatetoProps(state) {
   return {
+    employee: state.employeeSignedIn,
     table: state.chooseTable
   };
 }

@@ -5,7 +5,7 @@ import { Provider } from 'react-redux';
 import store from './../Redux/Store';
 
 import Drawer from 'react-native-drawer';
-import { MainTabbar, MenuStack } from './Router';
+import MainTabbar, { MenuStack } from './Router';
 
 import Header from './Header/Header';
 

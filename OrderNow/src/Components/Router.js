@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
-import { Dimensions, Image } from 'react-native';
+import { Dimensions, Image, View } from 'react-native';
 import {
 	StackNavigator, createBottomTabNavigator, createStackNavigator
 } from 'react-navigation';
+
+import { connect } from 'react-redux';
 
 import SignIn from './SignIn';
 import AppOrderNow from './AppOrderNow';
@@ -75,7 +77,45 @@ export const MenuStack = createStackNavigator({
 	headerMode: 'none'
 });
 
-export const MainTabbar = createBottomTabNavigator({
+export const MainTabbarNV = createBottomTabNavigator({
+	Home: HomeStack,
+	Order: OrderStack,
+	Bill: BillStack
+}, {
+	navigationOptions: ({ navigation }) => ({
+      tabBarIcon: ({ focused, tintColor }) => {
+        const { routeName } = navigation.state;
+        let iconName;
+        if (routeName === 'Home') {
+          iconName = homeIcon;
+        } else if (routeName === 'Order') {
+          iconName = orderIcon;
+        } else if (routeName === 'Bill') {
+          iconName = billIcon;
+        }
+
+        // You can return any component that you like here! We usually use an
+        // icon component from react-native-vector-icons
+        return <Image source={iconName} style={{ width: 25, height: 25, tintColor }} />;
+      },
+    }),
+	tabBarOptions: {
+		style: {
+			height: height / 12,
+			backgroundColor: '#F8F8F8',
+		},
+		labelStyle: {
+    		fontSize: 12
+		},
+		inactiveTintColor: '#B0B0B0',
+		activeTintColor: '#2ABB9C',
+		showIcon: true
+	},
+	animationEnabled: true,
+  	swipeEnabled: true,
+});
+
+export const MainTabbarQL = createBottomTabNavigator({
 	Home: HomeStack,
 	Order: OrderStack,
 	Bill: BillStack,
@@ -115,3 +155,21 @@ export const MainTabbar = createBottomTabNavigator({
 	animationEnabled: true,
   	swipeEnabled: true,
 });
+
+class MainTabbar extends Component {
+	render() {
+		return(
+			<View style={{ flex: 1 }}>
+				{ this.props.employeeSignedIn.decentralization ? <MainTabbarQL /> : <MainTabbarNV /> }
+			</View>
+		);
+	}
+} 
+
+function mapStateToProps(state) {
+	return {
+		employeeSignedIn: state.employeeSignedIn
+	};
+}
+
+export default connect(mapStateToProps)(MainTabbar);
