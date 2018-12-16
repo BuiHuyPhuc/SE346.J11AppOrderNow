@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 
 import realm from './../../../../Database/All_Schemas';
-import { queryAllFood, queryAllCategoryFood } from './../../../../Database/All_Schemas';
+import { queryAllFood } from './../../../../Database/All_Schemas';
 
 import { connect } from 'react-redux';
 import { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
@@ -12,6 +12,7 @@ import { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
 
 import HeaderBack from './../../HeaderBack';
 import PopUpFood from './PopUpFood';
+import getFormattedMoney from './../../../../Api/FormattedMoney';
 
 const { width, height } = Dimensions.get("window");
 
@@ -35,7 +36,7 @@ class MngFood extends Component {
   }
 
   render() {
-    const { search, listFood } = this.state;
+    const { listFood, search } = this.state;
     const { navigation, onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
             onPopupAddFood, onPopupUpdateDeleteFood } = this.props;
     const { container, wrapHeader, inputSearch, wrapFeature, btnFeature,
@@ -99,21 +100,21 @@ class MngFood extends Component {
                 style={wrapItem}
                 onPress={() => {
                   onShowPopupUpdateDelete();
-                  onPopupUpdateDeleteFood(item);
+                  onPopupUpdateDeleteFood(item.food);
                 }}
               >
                 <View style={txtTen}>
-                  <Text>{item.name}</Text>
+                  <Text>{item.food.name}</Text>
                 </View>                           
                 <View style={txtDonGia}>
-                  <Text>{item.price}</Text>
+                  <Text>{item.food.price.getFormattedMoney(0)}</Text>
                 </View>
                 <View style={txtLoai}>
-                  <Text>{item.idCategoryFood}</Text>
+                  <Text>{item.categoryFoodName}</Text>
                 </View>
               </TouchableOpacity> 
             }
-            keyExtractor={item => item.id.toString()}
+            keyExtractor={item => item.food.id.toString()}
           /> 
         </View>  
 

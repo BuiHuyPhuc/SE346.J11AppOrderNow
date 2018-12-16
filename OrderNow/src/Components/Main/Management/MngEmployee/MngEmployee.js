@@ -35,7 +35,7 @@ class MngEmployee extends Component {
   }
 
   render() {
-    const { search, listEmployee } = this.state;
+    const { listEmployee, search } = this.state;
     const { navigation, onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
             onPopupAddEmployee, onPopupUpdateDeleteEmployee } = this.props;
     const { container, wrapHeader, inputSearch, wrapFeature, btnFeature,

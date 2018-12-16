@@ -35,7 +35,7 @@ class MngCategoryFood extends Component {
   }
   
   render() {
-    const { search, listCategoryFood } = this.state;
+    const { listCategoryFood, search } = this.state;
     const { navigation, onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
             onPopupAddCategoryFood, onPopupUpdateDeleteCategoryFood } = this.props;
     const { container, wrapHeader, inputSearch, wrapFeature, btnFeature, 
@@ -94,18 +94,18 @@ class MngCategoryFood extends Component {
                 style={wrapItem}
                 onPress={() => {
                   onShowPopupUpdateDelete();
-                  onPopupUpdateDeleteCategoryFood(item);
+                  onPopupUpdateDeleteCategoryFood(item.categoryFood);
                 }}
               >
                 <View style={txtLoai}>
-                  <Text>{item.name}</Text>
+                  <Text>{item.categoryFood.name}</Text>
                 </View>
                 <View style={txtSoLuong}>
-                  <Text>{item.image}</Text>
+                  <Text>{item.foods.length}</Text>
                 </View>       
               </TouchableOpacity> 
             }
-            keyExtractor={item => item.id.toString()}
+            keyExtractor={item => item.categoryFood.id.toString()}
           />                                
         </View>  
         

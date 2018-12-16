@@ -39,7 +39,7 @@ class MngTable extends Component {
   }
   
   render() {
-    const { search, listTable } = this.state;
+    const { listTable, search } = this.state;
     const { navigation, onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
             onPopupAddTable, onPopupDeleteTable } = this.props;
     const { container, wrapHeader, inputSearch, wrapFeature, btnFeature ,            

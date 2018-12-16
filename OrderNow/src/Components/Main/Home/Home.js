@@ -29,7 +29,7 @@ export default class Home extends Component {
 
   onReloadData() {
     queryAllCategoryFood()
-    .then(listCategoryFood => this.setState({ listCategoryFood }))
+    .then(listCategoryFood => this.setState({ listCategoryFood: listCategoryFood }))
     .catch(error => this.setState({ listCategoryFood: [] }));
   }
 
@@ -84,7 +84,7 @@ export default class Home extends Component {
             <View style={wrapItemCategory}>
               <TouchableOpacity
                 style={{ width: imgMonNuong.imgWidth }}
-                onPress={() => navigate('Screen_CategoryDetail', { categoryFoodId: item.id })}
+                onPress={() => navigate('Screen_CategoryDetail', { categoryFoodId: item.categoryFood.id })}
               >
                 <Image
                   style={{ width: imgMonNuong.imgWidth, height: imgMonNuong.imgHeight }}
@@ -92,11 +92,11 @@ export default class Home extends Component {
                 />                            
               </TouchableOpacity>
               <View style={wrapText}>
-                <Text style={txtNameCategory}>{item.name}</Text>
+                <Text style={txtNameCategory}>{item.categoryFood.name}</Text>
               </View>
             </View> 
           }
-          keyExtractor={item => item.id.toString()}
+          keyExtractor={item => item.categoryFood.id.toString()}
         />
 
       </View>

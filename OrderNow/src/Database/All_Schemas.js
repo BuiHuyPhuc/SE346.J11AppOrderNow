@@ -185,6 +185,30 @@ export const queryAllTable = () => new Promise((resolve, reject) => {
     .catch(error => reject(error));
 });
 
+export const tableStatus = tableId => new Promise((resolve,reject) => {
+    Realm.open(databaseOptions)
+    .then(realm => {
+        // Lọc tất cả những hóa đơn chưa thanh toán
+        let filteredBills = realm.objects(BILL_SCHEMA).filtered(`status = false`);
+        
+        // Lọc tất cả những chi tiết hóa đơn theo số bàn và hóa đơn chưa thanh toán
+        if(filteredBills.length > 0) {
+            filteredBills.map(e => {
+                let filteredBillDetail = realm.objects(BILL_DETAIL_SCHEMA)
+                    .filtered(`idBill = ${e.id} AND idTable = ${tableId}`);
+                if(filteredBillDetail.length > 0) {
+                    filteredBillDetail.map(e => {
+                        return resolve(e.idBill);
+                    })                    
+                }
+            })
+        }
+
+        resolve(null);        
+    })
+    .catch(error => reject(error));
+});
+
 
 // -----------------------------------> CategoryFoodSchema <-----------------------------------
 export const insertNewCategoryFood = newCategoryFood => new  Promise((resolve, reject) => {
@@ -215,24 +239,13 @@ export const deleteCategoryFood = categoryFoodId => new Promise((resolve, reject
     Realm.open(databaseOptions)
     .then(realm => {
         realm.write(() => {
+            // Lọc tất cả món ăn theo loại món ăn và xóa
+            let allFoods = realm.objects(FOOD_SCHEMA).filtered(`idCategoryFood = ${categoryFoodId}`);
+            realm.delete(allFoods);
+
             let deletingCategoryFood = realm.objectForPrimaryKey(CATEGORY_FOOD_SCHEMA, categoryFoodId);
-            let allFoods = realm.objects(FOOD_SCHEMA);
-            let allFoodOfCategoryFood = [];
-
-            // Duyệt tất cả món ăn và lấy ra những món ăn nào thuộc loại món ăn cần xóa
-            allFoods.map(e => {
-                if(e.idCategoryFood === categoryFoodId)
-                    allFoodOfCategoryFood.push(e);                 
-            });
-
-            // Xóa những món ăn thuộc loại món ăn cần xóa
-            for(var index in allFoodOfCategoryFood) {
-                let deletingFood = allFoodOfCategoryFood[index];
-                realm.delete(deletingFood);
-            }
-
-            // Xóa loại món ăn
             realm.delete(deletingCategoryFood);
+
             resolve();
         });
     })
@@ -243,7 +256,17 @@ export const queryAllCategoryFood = () => new Promise((resolve, reject) => {
     Realm.open(databaseOptions)
     .then(realm => {
         let allCategoryFoods = realm.objects(CATEGORY_FOOD_SCHEMA);
-        resolve(allCategoryFoods);
+        let allCategoryFood_Foods = [];
+        
+        // Duyệt tất cả những loại món ăn và lấy ra những món ăn thuộc loại đó
+        if(allCategoryFoods.length > 0) {
+            allCategoryFoods.map(e => {
+                let allFoods = realm.objects(FOOD_SCHEMA).filtered(`idCategoryFood = ${e.id}`);
+                allCategoryFood_Foods.push({ categoryFood: e, foods: allFoods });
+            })
+        }
+
+        resolve(allCategoryFood_Foods);        
     })
     .catch(error => reject(error));
 });
@@ -265,9 +288,7 @@ export const updateFood = food => new Promise((resolve, reject) => {
     Realm.open(databaseOptions)
     .then(realm => {
         realm.write(() => {
-            console.log("food", food);
             let updatingFood = realm.objectForPrimaryKey(FOOD_SCHEMA, food.id);
-            console.log("updatingFood", updatingFood);
             updatingFood.name = food.name;
             updatingFood.price = food.price;
             updatingFood.image = food.image;
@@ -293,24 +314,69 @@ export const deleteFood = foodId => new Promise((resolve, reject) => {
 export const queryAllFood = () => new Promise((resolve, reject) => {
     Realm.open(databaseOptions)
     .then(realm => {
-        let allFoods = realm.objects(FOOD_SCHEMA);
-        resolve(allFoods);        
+        let allCategoryFoods = realm.objects(CATEGORY_FOOD_SCHEMA);
+        let allCategoryFood_Foods = [];
+
+        // Duyệt tất cả những loại món ăn và lấy ra những món ăn thuộc loại đó
+        if(allCategoryFoods.length > 0) {
+            allCategoryFoods.map(e => {
+                let categoryFoodName = e.name;
+                let allFoods = realm.objects(FOOD_SCHEMA).filtered(`idCategoryFood = ${e.id}`);
+                // Duyệt tất cả những món ăn gán tên loại món theo món ăn
+                if(allFoods.length > 0) {
+                    allFoods.map(e => {
+                        allCategoryFood_Foods.push({ food: e, categoryFoodName });
+                    })
+                }
+            })
+        }
+
+        resolve(allCategoryFood_Foods);        
     })
     .catch(error => reject(error));
 });
 
-export const queryAllFoodByCategoryFoodId = categoryFoodId => new Promise((resolve, reject) => {
+export const filterFoodByCategoryFoodId = categoryFoodId => new Promise((resolve, reject) => {
     Realm.open(databaseOptions)
     .then(realm => {
-        let allFoods = realm.objects(FOOD_SCHEMA);
-        let allFoodOfCategoryFood = [];
-        // Duyệt tất cả món ăn và lấy ra những món ăn nào thuộc loại món ăn
-        allFoods.map(e => {
-            if(e.idCategoryFood === categoryFoodId)
-                allFoodOfCategoryFood.push(e);                 
-        });
-
+        let allFoodOfCategoryFood = realm.objects(FOOD_SCHEMA).filtered(`idCategoryFood = ${categoryFoodId}`);
         resolve(allFoodOfCategoryFood);        
+    })
+    .catch(error => reject(error));
+});
+
+export const filterUnfinishedFood = () => new Promise((resolve,reject) => {
+    Realm.open(databaseOptions)
+    .then(realm => {
+        let filteredUnfinishedBillDetails = realm.objects(BILL_DETAIL_SCHEMA).filtered(`status = false`);
+        let filterUnfinishedFoods = [];
+        // Duyệt tất cả chi tiết hóa đơn chưa hoàn thành và lấy ra món ăn thuộc chi tiết đó
+        if(filteredUnfinishedBillDetails.length > 0) {
+            filteredUnfinishedBillDetails.map(e => {
+                let food = realm.objectForPrimaryKey(FOOD_SCHEMA, e.idFood);
+                filterUnfinishedFoods.push({ food, billDetail: e });
+            })
+        }        
+
+        resolve(filterUnfinishedFoods);
+    })
+    .catch(error => reject(error));
+});
+
+export const filterFinishedFoodByTable = table => new Promise((resolve,reject) => {
+    Realm.open(databaseOptions)
+    .then(realm => {
+        let filteredFinishedBillDetails = realm.objects(BILL_DETAIL_SCHEMA).filtered(`idTable = ${table} AND status = true`);
+        let filterFinishedFoods = [];
+        // Duyệt tất cả chi tiết hóa đơn chưa hoàn thành và lấy ra món ăn thuộc chi tiết đó
+        if(filteredFinishedBillDetails.length > 0) {
+            filteredFinishedBillDetails.map(e => {
+                let food = realm.objectForPrimaryKey(FOOD_SCHEMA, e.idFood);
+                filterFinishedFoods.push({ food, billDetail: e });
+            })
+        }        
+
+        resolve(filterFinishedFoods);
     })
     .catch(error => reject(error));
 });
@@ -352,62 +418,28 @@ export const queryAllBill = () => new Promise((resolve, reject) => {
     .catch(error => reject(error));
 });
 
-export const filterBillByStatus = status => new Promise((resolve,reject) => {
+export const filterUnpaidBill = () => new Promise((resolve,reject) => {
     Realm.open(databaseOptions)
     .then(realm => {
-        let filteredBills = realm.objects(BILL_SCHEMA).filtered(`status = "${status}"`);
-        resolve(filteredBills);
-    })
-    .catch(error => reject(error));
-});
+        let filterUnpaidBills = realm.objects(BILL_SCHEMA).filtered(`status = false`);
+        let allUnpaidBills = [];
+        // Duyệt tất cả hóa đơn chưa thanh toán và lọc ra tất cả chi tiết hóa đơn
+        if(filterUnpaidBills.length > 0) {
+            filterUnpaidBills.map(e => {
+                let filterBillDetails = realm.objects(BILL_DETAIL_SCHEMA).filtered(`idBill = ${e.id}`);
+                let total = 0;
+                let table = null;
+                //Duyệt tất cả chi tiết hóa đơn và lấy ra món ăn thuộc chi tiết đó
+                filterBillDetails.map(e => {
+                    let food = realm.objectForPrimaryKey(FOOD_SCHEMA, e.idFood);
+                    table = e.idTable;
+                    total += food.price * e.quantity;
+                });
 
-export const tableStatus = tableId => new Promise((resolve,reject) => {
-    Realm.open(databaseOptions)
-    .then(realm => {
-        // Lọc tất cả những hóa đơn chưa thanh toán
-        let filteredBills = realm.objects(BILL_SCHEMA).filtered(`status = false`);
-        
-        // Lọc tất cả những chi tiết hóa đơn theo số bàn và hóa đơn chưa thanh toán
-        if(filteredBills.length > 0) {
-            filteredBills.map(e => {
-                let filteredBillDetail = realm.objects(BILL_DETAIL_SCHEMA)
-                    .filtered(`idBill = ${e.id} AND idTable = ${tableId}`);
-                if(filteredBillDetail.length > 0) {
-                    filteredBillDetail.map(e => {
-                        return resolve(e.idBill);
-                    })                    
-                }
+                allUnpaidBills.push({ bill: e, table, total });
             })
-        }
-
-        resolve(null);        
-    })
-    .catch(error => reject(error));
-});
-
-export const insertNewBillDetailOnBillOld = newBillDetail => new  Promise((resolve, reject) => {
-    Realm.open(databaseOptions)
-    .then(realm => {
-        realm.write(() => {
-            realm.create(BILL_DETAIL_SCHEMA, newBillDetail);
-            resolve(newBillDetail);
-        });
-    })
-    .catch(error => reject(error));
-});
-
-export const deleteAllBillAndBillDetail = () => new Promise((resolve, reject) => {
-    Realm.open(databaseOptions)
-    .then(realm => {
-        realm.write(() => {
-            let allBillDetails = realm.objects(BILL_DETAIL_SCHEMA);
-            realm.delete(allBillDetails);
-
-            let allBills = realm.objects(BILL_SCHEMA);
-            realm.delete(allBills);
-            
-            resolve();
-        });
+        } 
+        resolve(allUnpaidBills);
     })
     .catch(error => reject(error));
 });
@@ -425,14 +457,23 @@ export const insertNewBillDetail = newBillDetail => new  Promise((resolve, rejec
     .catch(error => reject(error));
 });
 
-export const updateBillDetail = billDetail => new Promise((resolve,reject) => {
+export const insertNewBillDetailOnBillOld = newBillDetail => new  Promise((resolve, reject) => {
     Realm.open(databaseOptions)
     .then(realm => {
         realm.write(() => {
-            let updatingBillDetail = realm.objectForPrimaryKey(FOOD_SCHEMA, billDetail.id);
-            updatingBillDetail.quantity = billDetail.quantity;
-            updatingBillDetail.status = billDetail.status;
-            updatingBillDetail.time = billDetail.time;
+            realm.create(BILL_DETAIL_SCHEMA, newBillDetail);
+            resolve(newBillDetail);
+        });
+    })
+    .catch(error => reject(error));
+});
+
+export const updateStatusBillDetail = (billDetail, status) => new Promise((resolve,reject) => {
+    Realm.open(databaseOptions)
+    .then(realm => {
+        realm.write(() => {
+            let updatingBillDetail = realm.objectForPrimaryKey(BILL_DETAIL_SCHEMA, billDetail.id);
+            updatingBillDetail.status = status;
             resolve();
         });
     })
@@ -444,6 +485,24 @@ export const queryAllBillDetail = () => new Promise((resolve, reject) => {
     .then(realm => {
         let allBillDetails = realm.objects(BILL_DETAIL_SCHEMA);
         resolve(allBillDetails);        
+    })
+    .catch(error => reject(error));
+});
+
+
+// -------------------------> BillSchema - BillDetailSchema <-------------------------
+export const deleteAllBillAndBillDetail = () => new Promise((resolve, reject) => {
+    Realm.open(databaseOptions)
+    .then(realm => {
+        realm.write(() => {
+            let allBillDetails = realm.objects(BILL_DETAIL_SCHEMA);
+            realm.delete(allBillDetails);
+
+            let allBills = realm.objects(BILL_SCHEMA);
+            realm.delete(allBills);
+            
+            resolve();
+        });
     })
     .catch(error => reject(error));
 });

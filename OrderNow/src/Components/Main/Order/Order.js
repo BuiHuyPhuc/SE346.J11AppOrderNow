@@ -1,7 +1,12 @@
 import React, { Component } from 'react';
 import {
-  StyleSheet, Text, View, TouchableOpacity, Image, Dimensions, TextInput
+  StyleSheet, Text, View, TouchableOpacity, Image, Dimensions, TextInput, FlatList
 } from 'react-native';
+
+import realm from './../../../Database/All_Schemas';
+import { filterUnfinishedFood, updateStatusBillDetail } from './../../../Database/All_Schemas';
+
+import { getFormattedTime } from './../../../Api/FormattedDateTime';
 
 const { width, height } = Dimensions.get("window");
 
@@ -11,12 +16,29 @@ export default class Order extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      listUnfinishedFood: [],
       search: ''
     };
+    this.onReloadData();
+    realm.addListener('change', () => {
+      this.onReloadData();
+    })
+  }
+
+  onReloadData() {
+    filterUnfinishedFood()
+    .then(listUnfinishedFood => this.setState({ listUnfinishedFood }))
+    .catch(error => this.setState({ listUnfinishedFood: [] }));
+  }
+
+  onFinishedFood(item) {
+    updateStatusBillDetail(item.billDetail, true)
+    .then(() => alert(`${item.food.name} đã hoàn thành`))
+    .catch(error => alert('Món ăn bị lỗi!'));
   }
 
   render() {
-    const { search } = this.state;
+    const { listUnfinishedFood, search } = this.state;
     const { container, wrapHeader, inputSearch, wrapFeature, btnFeature,
             wrapTable, headerTable, headerWrapTen, headerWrapSoLuong, headerWrapBan, headerWrapThoiGian, txtHeader, 
             wrapItem, btnCheck, txtTen,txtSoLuong, txtBan, txtThoiGian
@@ -69,28 +91,34 @@ export default class Order extends Component {
             </View>            
           </View>
 
-          <View>
-            <View style={wrapItem}>
-              <TouchableOpacity
-                style={btnCheck}
-                onPress={() => {}}
-              >
-                <Image source={checkInactiveIcon}></Image>
-              </TouchableOpacity>
-              <View style={txtTen}>
-                <Text>Sụn gà cháy tỏi gà cháy tỏi</Text>
-              </View>
-              <View style={txtSoLuong}>
-                <Text>2</Text>
-              </View>
-              <View style={txtBan}>
-                <Text>1</Text>
-              </View>       
-              <View style={txtThoiGian}>
-                <Text>12:20</Text>
-              </View>
-            </View>            
-          </View>
+
+          <FlatList
+            data={listUnfinishedFood}
+            renderItem={({item}) => 
+              <View style={wrapItem}>
+                <TouchableOpacity
+                  style={btnCheck}
+                  onPress={() => this.onFinishedFood(item)}
+                >
+                  <Image source={checkInactiveIcon}></Image>
+                </TouchableOpacity>
+                <View style={txtTen}>
+                  <Text>{item.food.name}</Text>
+                </View>
+                <View style={txtSoLuong}>
+                  <Text>{item.billDetail.quantity}</Text>
+                </View>
+                <View style={txtBan}>
+                  <Text>{item.billDetail.idTable}</Text>
+                </View>       
+                <View style={txtThoiGian}>
+                  <Text>{getFormattedTime(item.billDetail.time)}</Text>
+                </View>
+              </View>  
+            }
+            keyExtractor={item => item.billDetail.id.toString()}
+          />
+
         </View>
       </View>
     );
@@ -146,7 +174,7 @@ const styles = StyleSheet.create({
     alignItems: 'center' 
   },
   btnCheck: { flex: 2, alignItems: 'center' },
-  txtTen: { flex: 7, alignItems: 'center' },
+  txtTen: { flex: 7, marginHorizontal: 5 },
   txtSoLuong: { flex: 6, alignItems: 'center' },
   txtBan: { flex: 3, alignItems: 'center' },
   txtThoiGian: { flex: 6, alignItems: 'center' }

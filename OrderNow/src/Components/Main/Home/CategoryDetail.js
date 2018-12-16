@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 
 import realm from './../../../Database/All_Schemas';
-import { queryAllFoodByCategoryFoodId, insertNewBill, queryAllBill,
+import { filterFoodByCategoryFoodId, insertNewBill, queryAllBill,
   insertNewBillDetail, queryAllBillDetail, tableStatus, deleteAllBillAndBillDetail } from './../../../Database/All_Schemas';
 
 import { connect } from 'react-redux';
@@ -12,7 +12,7 @@ import { connect } from 'react-redux';
 import HeaderBack from './../HeaderBack';
 import ComboboxTable from './ComboboxTable';
 import SourceImage from './../../../Api/SourceImage';
-import { getFormattedDate, getFormattedTime } from './../../../Api/FormattedDateTime';
+import getFormattedMoney from './../../../Api/FormattedMoney';
 
 let monnuongIcon = require('./../../../Media/Category/mon-nuong.png');
 const imgMonNuong = SourceImage(monnuongIcon);
@@ -33,7 +33,7 @@ class CategoryDetail extends Component {
   }
 
   onReloadData() {
-    queryAllFoodByCategoryFoodId(this.props.navigation.state.params.categoryFoodId)
+    filterFoodByCategoryFoodId(this.props.navigation.state.params.categoryFoodId)
     .then(list => {
       this.setState({ listFood: [] });
       list.map(e => {
@@ -182,8 +182,9 @@ class CategoryDetail extends Component {
               
               <View style={wrapInfoFood}>
                 <Text style={txtFood}>{item.food.name}</Text>
-                <Text style={txtFood}>Đơn giá: {item.food.price} VNĐ</Text>
+                <Text style={txtFood}>Đơn giá: {item.food.price.getFormattedMoney(0)} VNĐ</Text>
                 <View style={wrapSoLuongFood}>
+                  <Text style={txtFood}>Số lượng: </Text>
                   <TouchableOpacity
                     style={[btnFood, { width: 30 }]}
                     onPress={() => this.onDecrease(item.food.id)}

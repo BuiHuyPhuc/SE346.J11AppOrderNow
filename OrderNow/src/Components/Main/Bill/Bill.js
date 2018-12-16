@@ -1,7 +1,12 @@
 import React, { Component } from 'react';
 import {
-  StyleSheet, Text, View, TouchableOpacity, TextInput, Dimensions
+  StyleSheet, Text, View, TouchableOpacity, TextInput, Dimensions, FlatList, Alert
 } from 'react-native';
+
+import realm from './../../../Database/All_Schemas';
+import { filterUnpaidBill, updateBill } from './../../../Database/All_Schemas';
+
+import getFormattedMoney from './../../../Api/FormattedMoney';
 
 const { width, height } = Dimensions.get("window");
 
@@ -9,12 +14,44 @@ export default class Bill extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      listUnpaidBill: [],
       search: ''
     };
+    this.onReloadData();
+    realm.addListener('change', () => {
+      this.onReloadData();
+    })
+  }
+
+  onReloadData() {
+    filterUnpaidBill()
+    .then(listUnpaidBill => this.setState({ listUnpaidBill }))
+    .catch(error => this.setState({ listUnpaidBill: [] }));
+  }
+
+  onPaidBill(bill, table) {
+    Alert.alert(
+      'Thanh toán',
+      `Bàn số ${table} tổng tiền cần thanh toán ${bill.total.getFormattedMoney(0)} VNĐ`,
+      [
+        {
+          text: 'Yes', onPress: () => {
+            updateBill(bill)
+            .then(() => alert('Thanh toán thành công'))
+            .catch(error => alert('Thanh toán thất bại'));
+          }
+        },
+        {
+          text: 'No', onPress: () => {},
+          style: 'cancel'
+        }       
+      ],
+      { cancelable: true }
+    )    
   }
 
   render() {
-    const { search } = this.state;
+    const { listUnpaidBill, search } = this.state;
     const { navigation } = this.props;
     const { container, wrapSearch, inputSearch,
             wrapList, wrapItem, wrapLeftItem, wrapRightItem, txtTitle, btnXem, btnThanhtoan, btnText 
@@ -31,47 +68,39 @@ export default class Bill extends Component {
           />
         </View>       
 
-        <View style={wrapList}>
-          <View style={wrapItem}>
-            <View style={wrapLeftItem}>
-              <Text style={txtTitle}>Tên bàn</Text>
-              <TouchableOpacity 
-                style={btnXem}
-                onPress={() => navigation.navigate('Screen_BillDetail')}>
-                <Text style={btnText}>Xem chi tiết</Text>
-              </TouchableOpacity>
-            </View>
 
-            <View style={wrapRightItem}>
-              <Text style={txtTitle}>Tổng tiền: $</Text>
-              <TouchableOpacity 
-                style={btnThanhtoan}
-                onPress={() => {}}>
-                <Text style={btnText}>Thanh toán</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+        <FlatList
+          style={wrapList}
+          data={listUnpaidBill}
+          renderItem={({item}) => 
+            <View style={wrapItem}>
+              <View style={wrapLeftItem}>
+                <Text style={txtTitle}>Bàn {item.table}</Text>
+                <TouchableOpacity 
+                  style={btnXem}
+                  onPress={() => navigation.navigate('Screen_BillDetail', { table: item.table })}>
+                  <Text style={btnText}>Xem chi tiết</Text>
+                </TouchableOpacity>
+              </View>
 
-          <View style={wrapItem}>
-            <View style={wrapLeftItem}>
-              <Text style={txtTitle}>Tên bàn</Text>
-              <TouchableOpacity 
-                style={btnXem}
-                onPress={() => navigation.navigate('Screen_BillDetail')}>
-                <Text style={btnText}>Xem chi tiết</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={wrapRightItem}>
-              <Text style={txtTitle}>Tổng tiền: $</Text>
-              <TouchableOpacity 
-                style={btnThanhtoan}
-                onPress={() => {}}>
-                <Text style={btnText}>Thanh toán</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
+              <View style={wrapRightItem}>
+                <Text style={txtTitle}>Tổng tiền: {item.total.getFormattedMoney(0)} VNĐ</Text>
+                <TouchableOpacity 
+                  style={btnThanhtoan}
+                  onPress={() => this.onPaidBill(
+                      {id: item.bill.id, status: true, time: new Date(), total: item.total},
+                      item.table
+                    )
+                  }
+                >
+                  <Text style={btnText}>Thanh toán</Text>
+                </TouchableOpacity>
+              </View>
+            </View>  
+          }
+          keyExtractor={item => item.bill.id.toString()}
+        />
+        
       </View>
     );
   }
@@ -94,7 +123,6 @@ const styles = StyleSheet.create({
   },
   // ---> List bill <---
   wrapList: { 
-    flexDirection: 'column', 
     paddingHorizontal: 5 
   },
   wrapItem: { 
@@ -102,8 +130,8 @@ const styles = StyleSheet.create({
     borderWidth: 1, 
     marginTop: 5 
   },
-  wrapLeftItem: { flex: 1, borderRightWidth: 1, justifyContent: 'center', alignItems: 'center' },
-  wrapRightItem: { flex: 2, justifyContent: 'center', alignItems: 'center' },
+  wrapLeftItem: { flex: 3, borderRightWidth: 1, justifyContent: 'center', alignItems: 'center' },
+  wrapRightItem: { flex: 7, justifyContent: 'center', alignItems: 'center' },
   txtTitle: { 
     fontSize: 24, 
     paddingVertical: 5 

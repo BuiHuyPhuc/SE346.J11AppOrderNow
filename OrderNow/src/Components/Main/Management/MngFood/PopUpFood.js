@@ -136,7 +136,7 @@ class PopUpFood extends Component {
 					    >
 					    	{ 
 					    		listCategoryFood.map(e => (					    			
-					    			<Picker.Item key={e.id} value={e.id} label={e.name} />
+					    			<Picker.Item key={e.categoryFood.id} value={e.categoryFood.id} label={e.categoryFood.name} />
 					    		)) 
 					    	}
 					    </Picker>
