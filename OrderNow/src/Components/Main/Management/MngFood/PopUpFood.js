@@ -20,12 +20,15 @@ class PopUpFood extends Component {
 			price: '',
 			selectedCategoryFoodId: null
 		};
-		this.onLoadListCategoryFood();
+		this.onLoadListCategoryFood();		
 	}
 
 	onLoadListCategoryFood() {
 	   	queryAllCategoryFood()
-	    .then(listCategoryFood => this.setState({ listCategoryFood }))
+	    .then(listCategoryFood => {
+	    	this.setState({ listCategoryFood });
+	    	listCategoryFood.slice(0, 1).map(e => this.setState({ selectedCategoryFoodId: e.id }));
+	    })
 	    .catch(error => this.setState({ listCategoryFood: [] }));
 	}
 
@@ -136,7 +139,7 @@ class PopUpFood extends Component {
 					    >
 					    	{ 
 					    		listCategoryFood.map(e => (					    			
-					    			<Picker.Item key={e.categoryFood.id} value={e.categoryFood.id} label={e.categoryFood.name} />
+					    			<Picker.Item key={e.id} value={e.id} label={e.name} />
 					    		)) 
 					    	}
 					    </Picker>
@@ -175,11 +178,6 @@ class PopUpFood extends Component {
 				</View>
 			</Dialog>
 		);
-	}
-
-	componentDidMount() {
-		//set selectedCategoryFoodId = id của loại món ăn đầu tiên trong list
-		this.state.listCategoryFood.slice(0, 1).map(e => this.setState({ selectedCategoryFoodId: e.id }))
 	}
 }
 

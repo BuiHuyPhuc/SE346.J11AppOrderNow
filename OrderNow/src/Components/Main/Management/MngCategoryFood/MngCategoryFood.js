@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 
 import realm from './../../../../Database/All_Schemas';
-import { queryAllCategoryFood } from './../../../../Database/All_Schemas';
+import { queryAllCategoryFoodAndFoods } from './../../../../Database/All_Schemas';
 
 import { connect } from 'react-redux';
 import { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete, onLoadListCategoryFood,
@@ -19,7 +19,7 @@ class MngCategoryFood extends Component {
   constructor (props) {
     super(props);
     this.state = {
-      listCategoryFood: [],
+      listCategoryFood_Foods: [],
       search: ''
     };
     this.onReloadData();
@@ -28,14 +28,18 @@ class MngCategoryFood extends Component {
     });
   }
 
+  componentWillUnmount() {
+    this.isCancelled = true;
+  }
+
   onReloadData() {
-    queryAllCategoryFood()
-    .then(listCategoryFood => this.setState({ listCategoryFood }))
-    .catch(error => this.setState({ listCategoryFood: [] }));
+    queryAllCategoryFoodAndFoods()
+    .then(listCategoryFood_Foods => this.setState({ listCategoryFood_Foods }))
+    .catch(error => this.setState({ listCategoryFood_Foods: [] }));
   }
   
   render() {
-    const { listCategoryFood, search } = this.state;
+    const { listCategoryFood_Foods, search } = this.state;
     const { navigation, onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
             onPopupAddCategoryFood, onPopupUpdateDeleteCategoryFood } = this.props;
     const { container, wrapHeader, inputSearch, wrapFeature, btnFeature, 
@@ -88,7 +92,7 @@ class MngCategoryFood extends Component {
 
         
           <FlatList
-            data={listCategoryFood}
+            data={listCategoryFood_Foods}
             renderItem={({item}) =>
               <TouchableOpacity 
                 style={wrapItem}

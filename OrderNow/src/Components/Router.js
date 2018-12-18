@@ -11,6 +11,7 @@ import AppOrderNow from './AppOrderNow';
 
 import Home from './Main/Home/Home';
 import CategoryDetail from './Main/Home/CategoryDetail';
+import Main from './Main/Home/Main';
 import Order from './Main/Order/Order';
 import Bill from './Main/Bill/Bill';
 import BillDetail from './Main/Bill/BillDetail';
@@ -78,7 +79,7 @@ export const MenuStack = createStackNavigator({
 });
 
 export const MainTabbarNV = createBottomTabNavigator({
-	Home: HomeStack,
+	Home: Main,
 	Order: OrderStack,
 	Bill: BillStack
 }, {
@@ -116,7 +117,7 @@ export const MainTabbarNV = createBottomTabNavigator({
 });
 
 export const MainTabbarQL = createBottomTabNavigator({
-	Home: HomeStack,
+	Home: Main,
 	Order: OrderStack,
 	Bill: BillStack,
 	Management: ManagementStack

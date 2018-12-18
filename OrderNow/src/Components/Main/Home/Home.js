@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 
 import realm from './../../../Database/All_Schemas';
-import { queryAllCategoryFood } from './../../../Database/All_Schemas';
+import { queryAllCategoryFood, filterCategory_Food } from './../../../Database/All_Schemas';
 
 import ComboboxTable from './ComboboxTable';
 import SourceImage from './../../../Api/SourceImage';
@@ -29,7 +29,13 @@ export default class Home extends Component {
 
   onReloadData() {
     queryAllCategoryFood()
-    .then(listCategoryFood => this.setState({ listCategoryFood: listCategoryFood }))
+    .then(listCategoryFood => this.setState({ listCategoryFood }))
+    .catch(error => this.setState({ listCategoryFood: [] }));
+  }
+
+  onFilterData(search) {
+    filterCategory_Food(search)
+    .then(listCategoryFood => this.setState({ listCategoryFood }))
     .catch(error => this.setState({ listCategoryFood: [] }));
   }
 
@@ -39,6 +45,7 @@ export default class Home extends Component {
     const { container, wrapHeader, inputSearch, wrapAllFeature, wrapFeature, btnFeature,
             wrapItemCategory, wrapText, txtNameCategory 
           } = styles;
+
     return (
       <View style={container}>
         <View style={wrapHeader}>
@@ -51,7 +58,7 @@ export default class Home extends Component {
               if(text == '')
                 this.onReloadData();
               else
-                this.setState({ listCategoryFood: [] }); 
+                this.onFilterData(text); 
             }}
             value={search}
           />
@@ -84,7 +91,7 @@ export default class Home extends Component {
             <View style={wrapItemCategory}>
               <TouchableOpacity
                 style={{ width: imgMonNuong.imgWidth }}
-                onPress={() => navigate('Screen_CategoryDetail', { categoryFoodId: item.categoryFood.id })}
+                onPress={() => navigate('Screen_CategoryDetail', { categoryFoodId: item.id })}
               >
                 <Image
                   style={{ width: imgMonNuong.imgWidth, height: imgMonNuong.imgHeight }}
@@ -92,11 +99,11 @@ export default class Home extends Component {
                 />                            
               </TouchableOpacity>
               <View style={wrapText}>
-                <Text style={txtNameCategory}>{item.categoryFood.name}</Text>
+                <Text style={txtNameCategory}>{item.name}</Text>
               </View>
             </View> 
           }
-          keyExtractor={item => item.categoryFood.id.toString()}
+          keyExtractor={item => item.id.toString()}
         />
 
       </View>

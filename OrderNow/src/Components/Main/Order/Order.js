@@ -34,7 +34,7 @@ export default class Order extends Component {
   onFinishedFood(item) {
     updateStatusBillDetail(item.billDetail, true)
     .then(() => alert(`${item.food.name} đã hoàn thành`))
-    .catch(error => alert('Món ăn bị lỗi!'));
+    .catch(error => alert('Món ăn bị lỗi'));
   }
 
   render() {

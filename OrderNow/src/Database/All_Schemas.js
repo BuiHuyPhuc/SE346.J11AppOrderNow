@@ -1,6 +1,6 @@
 import Realm from 'realm';
 
-import { getFormattedDate } from './../Api/FormattedDateTime.js';
+import { getFormattedDate } from './../Api/FormattedDateTime';
 
 export const EMPLOYEE_SCHEMA = "Employee";
 export const TABLE_SCHEMA = "Table";
@@ -255,6 +255,16 @@ export const deleteCategoryFood = categoryFoodId => new Promise((resolve, reject
 export const queryAllCategoryFood = () => new Promise((resolve, reject) => {
     Realm.open(databaseOptions)
     .then(realm => {
+        let allCategoryFoods = realm.objects(CATEGORY_FOOD_SCHEMA);      
+        resolve(allCategoryFoods);        
+    })
+    .catch(error => reject(error));
+});
+
+//Management CategoryFood
+export const queryAllCategoryFoodAndFoods = () => new Promise((resolve, reject) => {
+    Realm.open(databaseOptions)
+    .then(realm => {
         let allCategoryFoods = realm.objects(CATEGORY_FOOD_SCHEMA);
         let allCategoryFood_Foods = [];
         
@@ -340,7 +350,38 @@ export const filterFoodByCategoryFoodId = categoryFoodId => new Promise((resolve
     Realm.open(databaseOptions)
     .then(realm => {
         let allFoodOfCategoryFood = realm.objects(FOOD_SCHEMA).filtered(`idCategoryFood = ${categoryFoodId}`);
-        resolve(allFoodOfCategoryFood);        
+        let allFoods = [];
+
+        if(allFoodOfCategoryFood.length > 0) {
+            allFoodOfCategoryFood.map(e => {
+                allFoods.push({ food: e, quantity: 1 });
+            })
+        }
+
+        resolve(allFoods);        
+    })
+    .catch(error => reject(error));
+});
+
+export const filterCategoryFoodOrFood = searchText => new Promise((resolve, reject) => {
+    Realm.open(databaseOptions)
+    .then(realm => {
+        //Lọc theo loại món ăn
+        let filterCategoryFood_Foods = realm.objects(CATEGORY_FOOD_SCHEMA).filtered(`name CONTAINS[c] "${searchText}"`); //[c] = case insensitive
+        if(filterCategoryFood_Foods.length < 1) {
+            //Lọc theo món ăn
+            filterCategoryFood_Foods = realm.objects(FOOD_SCHEMA).filtered(`name CONTAINS[c] "${searchText}"`); //[c] = case insensitiv
+            let allFoods = [];
+            console.log("filterCategoryFood_Foods - 1", filterCategoryFood_Foods);
+            if(filterCategoryFood_Foods.length > 0) {
+                filterCategoryFood_Foods.map(e => {
+                    allFoods.push({ food: e, quantity: 1 });
+                })
+            }
+            resolve({listData: allFoods, nameList: 'food'});
+        } else {
+            resolve({listData: filterCategoryFood_Foods, nameList: 'categoryFood'}); 
+        }
     })
     .catch(error => reject(error));
 });
@@ -512,20 +553,35 @@ export const deleteAllBillAndBillDetail = () => new Promise((resolve, reject) =>
 export const filterBillByMonth = month => new Promise((resolve,reject) => {
     Realm.open(databaseOptions)
     .then(realm => {
-        let filteredBills = realm.objects(BILL_SCHEMA).filtered(`time.getMonth() + 1 = "${month}"`);
-        resolve(filteredBills);
+        let filterBills = realm.objects(BILL_SCHEMA).filtered(`status = true`);
+        let filterBillByMonth = [];
+
+        // Lọc những hóa đơn nào thuộc tháng đã chọn
+        filterBills.map(e => {
+            if(e.time.getMonth() + 1 == month) {
+                filterBillByMonth.push(e)
+            }
+        })
+        
+        resolve(filterBillByMonth);
     })
     .catch(error => reject(error));
 });
 
-export const filterBillByDate = date => new Promise((resolve,reject) => {
+export const filterBillByDay = day => new Promise((resolve, reject) => {
     Realm.open(databaseOptions)
     .then(realm => {
-        let filteredBills = realm.objects(BILL_SCHEMA).filtered(
-                `getFormattedDate(time) = "${getFormattedDate(date)}"`
-                //`time.getDate() = "${date.getDate()}" AND time.getMonth() = "${date.getMonth()}" AND time.getFullYear() + 1 = "${date.getFullYear()}"`
-            );
-        resolve(filteredBills);
+        let filterBills = realm.objects(BILL_SCHEMA).filtered(`status = true`);
+        let filterBillByDay = [];
+
+        // Lọc những hóa đơn nào thuộc tháng đã chọn
+        filterBills.map(e => {
+            if(getFormattedDate(e.time) == day) {
+                filterBillByDay.push(e)
+            }
+        })
+        
+        resolve(filterBillByDay);
     })
     .catch(error => reject(error));
 });

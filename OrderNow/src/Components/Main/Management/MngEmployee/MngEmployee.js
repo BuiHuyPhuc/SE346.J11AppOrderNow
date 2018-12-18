@@ -24,8 +24,12 @@ class MngEmployee extends Component {
     };
     this.onReloadData();
     realm.addListener('change', () => {
-      this.onReloadData();    
+      this.onReloadData();           
     });
+  }
+
+  componentWillUnmount() {
+    this.isCancelled = true;
   }
 
   onReloadData() {
