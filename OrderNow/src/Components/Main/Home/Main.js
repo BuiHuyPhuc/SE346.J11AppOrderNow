@@ -10,7 +10,7 @@ import { queryAllCategoryFood, filterFoodByCategoryFoodId, insertNewBill, insert
 import { connect } from 'react-redux';
 
 import HeaderBack from './../HeaderBack';
-import ComboboxTable from './ComboboxTable';
+import HeaderHome from './HeaderHome';
 import SourceImage from './../../../Api/SourceImage';
 import getFormattedMoney from './../../../Api/FormattedMoney';
 
@@ -20,9 +20,7 @@ import FlatListFood from './FlatListFood';
 let monnuongIcon = require('./../../../Media/Category/mon-nuong.png');
 const imgMonNuong = SourceImage(monnuongIcon);
 
-const { width, height } = Dimensions.get("window")
-
-const MainView = null;
+const { width, height } = Dimensions.get("window");
 
 class Main extends Component {
   constructor (props) {
@@ -31,12 +29,11 @@ class Main extends Component {
       listData: [],
       nameList: 'categoryFood',
       categoryFoodId: null,
-      search: '',
       isFilter: false,
     };
     this.onReloadData();
     realm.addListener('change', () => {
-      this.state.isFilter ? this.onFilterData() : this.onReloadData();
+      this.state.isFilter ? this.onFilterData(this.props.search) : this.onReloadData();
     })
   }
 
@@ -48,7 +45,7 @@ class Main extends Component {
 
   onNavigationFood(categoryFoodId) {
     filterFoodByCategoryFoodId(categoryFoodId)
-    .then(listData => this.setState({ listData, nameList: 'food', categoryFoodId }))
+    .then(listData => this.setState({ listData, nameList: 'food', categoryFoodId, isFilter: false }))
     .catch(error => this.setState({ listData: [] }));
   }
 
@@ -160,13 +157,8 @@ class Main extends Component {
   }
 
   render() {
-    const { listData, nameList, search } = this.state;
-    const { table, employee } = this.props;
-    const { container, wrapHeader, inputSearch, wrapAllFeature, wrapFeature, btnFeature,
-            wrapListData, headerBack, btnBack, txtBack,
-            wrapText, txtNameCategory,
-            wrapItemFood, wrapInfoFood, txtFood, wrapSoLuongFood, btnFood 
-          } = styles;
+    const { listData, nameList } = this.state;
+    const { container, wrapListData, headerBack, btnBack, txtBack } = styles;
 
     console.log("nameList", nameList);
     const MainView = nameList == 'categoryFood' ?
@@ -181,44 +173,15 @@ class Main extends Component {
       onDecrease={foodId => this.onDecrease(foodId)}
       onInsertOrder={food => this.onInsertOrder(food)}
     />
-    //<View />
 
     return (
       <View style={container}>
-        <View style={wrapHeader}>
-          <TextInput 
-            style={inputSearch}
-            placeholder="Search"
-            underlineColorAndroid='transparent'
-            value={search}
-            onChangeText={text => {
-              this.setState({ search: text });
-              if(text === '')
-                this.onBackCategoryFood();
-              else
-                this.onFilterData(text);
-            }}
-          />
-
-          <View style={wrapAllFeature}>
-            <ComboboxTable />
-
-            <View style={wrapFeature}>
-              <TouchableOpacity
-                style={btnFeature}
-                onPress={() => this.onShowBill()}
-              >
-                <Text>a</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={btnFeature}
-                onPress={() => this.onShowBillDetail()}
-              >
-                <Text>a</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
+        <HeaderHome 
+          onBackCategoryFood={() => this.onBackCategoryFood()}
+          onFilterData={searchText => this.onFilterData(searchText)}
+          onShowBill={() => this.onShowBill()}
+          onShowBillDetail={() => this.onShowBillDetail()}
+        />
 
         {nameList === 'categoryFood' ? null : (
           <View style={headerBack}>
@@ -241,7 +204,8 @@ class Main extends Component {
 function mapStatetoProps(state) {
   return {
     employee: state.employeeSignedIn,
-    table: state.chooseTable
+    table: state.chooseTable.table,
+    search: state.chooseTable.search
   };
 }
 
@@ -250,32 +214,6 @@ export default connect(mapStatetoProps)(Main);
 const styles = StyleSheet.create({
   container: {
     flex: 1
-  },
-  // ---> Header <---
-  wrapHeader: {
-    paddingHorizontal: 10,
-    marginBottom: 5
-  },
-  inputSearch: {
-    width: width - 20,
-    height: height / 16,
-    backgroundColor: 'whitesmoke',
-    padding: 10,
-    marginVertical: 5
-  },
-  wrapAllFeature: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  wrapFeature: {
-    flexDirection: 'row',
-  },
-  btnFeature: {
-    backgroundColor: '#2ABB9C',
-    marginLeft: 5,
-    width: 32,
-    height: 32
   },
   // ---> Header Back <---
   headerBack: {
@@ -290,37 +228,4 @@ const styles = StyleSheet.create({
   txtBack: {
     fontSize: 20
   },
-  ///////////// FlatList/////////////
-  wrapListData: {
-    paddingHorizontal: 5
-  },
-  // ---> List CategoryFood <---
-  wrapText: {
-    padding: 5,
-    justifyContent: 'center',
-    alignItems: 'center' 
-  },
-  txtNameCategory: {
-    fontSize: 24
-  },
-  // ---> List Food <---
-  wrapItemFood: {    
-    flexDirection: 'row',
-    marginTop: 5
-  },
-  wrapInfoFood: {
-    marginLeft: 10,
-    marginTop: -5,
-    justifyContent: 'space-around'
-  },
-  txtFood: {
-    fontSize: 18
-  },
-  wrapSoLuongFood: {
-    flexDirection: 'row'
-  },
-  btnFood: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  }
 });

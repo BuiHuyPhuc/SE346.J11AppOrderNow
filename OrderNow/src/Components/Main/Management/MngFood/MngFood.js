@@ -39,12 +39,23 @@ class MngFood extends Component {
     .catch(error => this.setState({ listFood: [] }));
   }
 
+  onSearch(searchText) {
+    queryAllFood()
+    .then(listFood => {
+      if(!isNaN(parseInt(searchText)))
+        this.setState({ listFood: listFood.filter(item => item.food.price === parseInt(searchText)) });
+      else
+        this.setState({ listFood: listFood.filter(item => (item.food.name.search(searchText) > -1) || (item.categoryFoodName.search(searchText) > -1)) });
+    })
+    .catch(error => this.setState({ listFood: [] }));
+  }
+
   render() {
     const { listFood, search } = this.state;
     const { navigation, onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
             onPopupAddFood, onPopupUpdateDeleteFood } = this.props;
     const { container, wrapHeader, inputSearch, wrapFeature, btnFeature,
-            wrapTable, headerTable, headerWrapTen, headerWrapDonGia, headerWrapLoai, txtHeader,
+            headerTable, headerWrapTen, headerWrapDonGia, headerWrapLoai, txtHeader,
             wrapItem, txtTen, txtDonGia, txtLoai
           } = styles;
     return (
@@ -57,10 +68,16 @@ class MngFood extends Component {
         <View style={wrapHeader}>
           <TextInput 
             style={inputSearch}
-            placeholder="Search"
+            placeholder="Tìm kiếm loại món ăn, tên món hoặc giá ..."
             underlineColorAndroid='transparent'
             value={search}
-            onChangeText={text => this.setState({ search: text })}
+            onChangeText={text => {
+              this.setState({ search: text });
+              if(text == '')
+                this.onReloadData();
+              else
+                this.onSearch(text);
+            }}
           />
           <View style={wrapFeature}>
             <TouchableOpacity
@@ -75,52 +92,50 @@ class MngFood extends Component {
           </View>
         </View>
 
-        <View style={wrapTable}>
-          <View style={headerTable}>
-            <View style={headerWrapTen}>
-              <TouchableOpacity 
-                onPress={() => {}}>                
-                <Text style={txtHeader}>Tên món</Text>
-              </TouchableOpacity>              
-            </View>
-            <View style={headerWrapDonGia}>
-              <TouchableOpacity 
-                onPress={() => {}}>
-                <Text style={txtHeader}>Đơn giá</Text>
-              </TouchableOpacity>              
-            </View>
-            <View style={headerWrapLoai}>
-              <TouchableOpacity 
-                onPress={() => {}}>                
-                <Text style={txtHeader}>Loại món</Text>
-              </TouchableOpacity>              
-            </View>                       
+        <View style={headerTable}>
+          <View style={headerWrapTen}>
+            <TouchableOpacity 
+              onPress={() => {}}>                
+              <Text style={txtHeader}>Tên món</Text>
+            </TouchableOpacity>              
           </View>
+          <View style={headerWrapDonGia}>
+            <TouchableOpacity 
+              onPress={() => {}}>
+              <Text style={txtHeader}>Đơn giá</Text>
+            </TouchableOpacity>              
+          </View>
+          <View style={headerWrapLoai}>
+            <TouchableOpacity 
+              onPress={() => {}}>                
+              <Text style={txtHeader}>Loại món</Text>
+            </TouchableOpacity>              
+          </View>                       
+        </View>
 
-          <FlatList
-            data={listFood}
-            renderItem={({item}) => 
-              <TouchableOpacity
-                style={wrapItem}
-                onPress={() => {
-                  onShowPopupUpdateDelete();
-                  onPopupUpdateDeleteFood(item.food);
-                }}
-              >
-                <View style={txtTen}>
-                  <Text>{item.food.name}</Text>
-                </View>                           
-                <View style={txtDonGia}>
-                  <Text>{item.food.price.getFormattedMoney(0)}</Text>
-                </View>
-                <View style={txtLoai}>
-                  <Text>{item.categoryFoodName}</Text>
-                </View>
-              </TouchableOpacity> 
-            }
-            keyExtractor={item => item.food.id.toString()}
-          /> 
-        </View>  
+        <FlatList
+          data={listFood}
+          renderItem={({item}) =>
+            <TouchableOpacity
+              style={wrapItem}
+              onPress={() => {
+                onShowPopupUpdateDelete();
+                onPopupUpdateDeleteFood(item.food);
+              }}
+            >
+              <View style={txtTen}>
+                <Text>{item.food.name}</Text>
+              </View>                           
+              <View style={txtDonGia}>
+                <Text>{item.food.price.getFormattedMoney(0)}</Text>
+              </View>
+              <View style={txtLoai}>
+                <Text>{item.categoryFoodName}</Text>
+              </View>
+            </TouchableOpacity> 
+          }
+          keyExtractor={item => item.food.id.toString()}
+        />  
 
         <PopUpFood />
       </View>
@@ -159,12 +174,10 @@ const styles = StyleSheet.create({
     height: 32
   },
   // ---> Table Header <---
-  wrapTable: {
-    paddingHorizontal: 5,
-    marginTop: 10 
-  },
   headerTable: {
-    flexDirection: 'row'
+    flexDirection: 'row',
+    paddingHorizontal: 5,
+    marginTop: 10
   },
   headerWrapTen: { flex: 2, justifyContent: 'center', alignItems: 'center' },
   headerWrapDonGia: { flex: 1, justifyContent: 'center', alignItems: 'center' },
@@ -175,6 +188,7 @@ const styles = StyleSheet.create({
   // ---> Table Item <---
   wrapItem: { 
     flexDirection: 'row',
+    paddingHorizontal: 5,
     marginTop: 5, 
     alignItems: 'center' 
   },

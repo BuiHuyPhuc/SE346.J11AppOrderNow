@@ -41,6 +41,12 @@ class MngTable extends Component {
     .then(listTable => this.setState({ listTable }))
     .catch(error => this.setState({ listTable: [] }));
   }
+
+  onSearch(searchText) {
+    queryAllTable()
+    .then(listTable => this.setState({ listTable: listTable.filter(item => item.id === parseInt(searchText)) }))
+    .catch(error => this.setState({ listTable: [] }));
+  }
   
   render() {
     const { listTable, search } = this.state;
@@ -59,10 +65,16 @@ class MngTable extends Component {
         <View style={wrapHeader}>
           <TextInput 
             style={inputSearch}
-            placeholder="Search"
+            placeholder="Tìm kiếm bàn ..."
             underlineColorAndroid='transparent'
             value={search}
-            onChangeText={text => this.setState({ search: text })}
+            onChangeText={text => {
+              this.setState({ search: text });
+              if(text == '')
+                this.onReloadData();
+              else
+                this.onSearch(text);
+            }}
           />
           <View style={wrapFeature}>
             <TouchableOpacity

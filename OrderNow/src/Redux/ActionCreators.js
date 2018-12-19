@@ -13,6 +13,10 @@ export function onChooseTable(table) {
 	return { type: 'CHOSEN_TABLE', table };
 }
 
+export function onChangeSearch(search) {
+	return { type: 'CHANGE_SEARCH', search };
+}
+
 // ---> Bật - tắt Popup <---
 export function onCancelPopup() {
 	return { type: 'CANCEL_POPUP' };

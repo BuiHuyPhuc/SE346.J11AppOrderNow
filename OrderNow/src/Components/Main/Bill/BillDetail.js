@@ -4,11 +4,12 @@ import {
 } from 'react-native';
 
 import realm from './../../../Database/All_Schemas';
-import { filterFinishedFoodByTable, updateStatusBillDetail } from './../../../Database/All_Schemas';
+import { filterFoodByTable, updateStatusBillDetail } from './../../../Database/All_Schemas';
 
 import HeaderBack from './../HeaderBack';
 import getFormattedMoney from './../../../Api/FormattedMoney';
 
+let checkInactiveIcon = require('./../../../Media/Icon/check-inactive.png');
 let checkActiveIcon = require('./../../../Media/Icon/check-active.png');
 
 const { width, height } = Dimensions.get("window");
@@ -26,7 +27,7 @@ export default class BillDetail extends Component {
   }
 
   onReloadData() {
-    filterFinishedFoodByTable(this.props.navigation.state.params.table)
+    filterFoodByTable(this.props.navigation.state.params.table)
     .then(listFinishFood => this.setState({ listFinishFood }))
     .catch(error => this.setState({ listFinishFood: [] }));
   }
@@ -40,7 +41,7 @@ export default class BillDetail extends Component {
   render() {
     const { listFinishFood } = this.state;
     const { navigation } = this.props;
-    const { container, wrapTable, wrapHeaderTable, headerTen, headerDonGia, headerSoLuong, headerTriGia, txtHeader,
+    const { container, wrapHeaderTable, headerTen, headerDonGia, headerSoLuong, headerTriGia, txtHeader,
             wrapItem, btnCheck, txtTen, txtDonGia, txtSoLuong, txtTriGia 
           } = styles;
     return (
@@ -50,52 +51,48 @@ export default class BillDetail extends Component {
           name="Bill Detail tên bàn"
         />
 
-        <View style={wrapTable}>
-        
-          <View style={wrapHeaderTable}>
-            <View style={headerTen}>
-              <Text style={txtHeader}>Tên món</Text>    
-            </View>
-            <View style={headerDonGia}>
-              <Text style={txtHeader}>Đơn giá</Text>      
-            </View>
-            <View style={headerSoLuong}>
-              <Text style={txtHeader}>Số lượng</Text>              
-            </View> 
-            <View style={headerTriGia}>
-              <Text style={txtHeader}>Trị giá</Text>              
-            </View>           
+        <View style={wrapHeaderTable}>
+          <View style={headerTen}>
+            <Text style={txtHeader}>Tên món</Text>    
           </View>
-
-
-          <FlatList
-            data={listFinishFood}
-            renderItem={({item}) => 
-              <View style={wrapItem}>
-                <TouchableOpacity
-                  style={btnCheck}
-                  onPress={() => this.onUnfinishedFood(item)}
-                >
-                  <Image source={checkActiveIcon}></Image>
-                </TouchableOpacity>
-                <View style={txtTen}>
-                  <Text>{item.food.name}</Text>
-                </View>              
-                <View style={txtDonGia}>
-                  <Text>{item.food.price.getFormattedMoney(0)}</Text>
-                </View>              
-                <View style={txtSoLuong}>
-                  <Text >{item.billDetail.quantity}</Text>
-                </View>
-                <View style={txtTriGia}>                            
-                <Text>{(item.food.price * item.billDetail.quantity).getFormattedMoney(0)}</Text>
-                </View>
-              </View>  
-            }
-            keyExtractor={item => item.billDetail.id.toString()}
-          />
-
+          <View style={headerDonGia}>
+            <Text style={txtHeader}>Đơn giá</Text>      
+          </View>
+          <View style={headerSoLuong}>
+            <Text style={txtHeader}>Số lượng</Text>              
+          </View> 
+          <View style={headerTriGia}>
+            <Text style={txtHeader}>Trị giá</Text>              
+          </View>           
         </View>
+
+
+        <FlatList
+          data={listFinishFood}
+          renderItem={({item}) => 
+            <View style={wrapItem}>
+              <TouchableOpacity
+                style={btnCheck}
+                onPress={() => item.billDetail.status ? this.onUnfinishedFood(item) : {}}
+              >
+                <Image source={item.billDetail.status ? checkActiveIcon : checkInactiveIcon}></Image>
+              </TouchableOpacity>
+              <View style={txtTen}>
+                <Text>{item.food.name}</Text>
+              </View>              
+              <View style={txtDonGia}>
+                <Text>{item.food.price.getFormattedMoney(0)}</Text>
+              </View>              
+              <View style={txtSoLuong}>
+                <Text >{item.billDetail.quantity}</Text>
+              </View>
+              <View style={txtTriGia}>                            
+              <Text>{(item.food.price * item.billDetail.quantity).getFormattedMoney(0)}</Text>
+              </View>
+            </View>  
+          }
+          keyExtractor={item => item.billDetail.id.toString()}
+        />
       </View>
     );
   }
@@ -106,12 +103,10 @@ const styles = StyleSheet.create({
     flex: 1
   },
   // ---> Table Header <---
-  wrapTable: {
-    flex: 4,
-    padding: 5 
-  },
   wrapHeaderTable: {
-    flexDirection: 'row'
+    flexDirection: 'row',
+    paddingHorizontal: 5,
+    marginTop: 20
   },
   headerTen: { flex: 2, justifyContent: 'center', alignItems: 'center' },
   headerDonGia: { flex: 1, justifyContent: 'center', alignItems: 'center' },
@@ -122,7 +117,8 @@ const styles = StyleSheet.create({
   },
   // ---> Table Item <---
   wrapItem: { 
-    flexDirection: 'row', 
+    flexDirection: 'row',
+    paddingHorizontal: 5,
     marginTop: 5, 
     alignItems: 'center' 
   },

@@ -363,61 +363,26 @@ export const filterFoodByCategoryFoodId = categoryFoodId => new Promise((resolve
     .catch(error => reject(error));
 });
 
-export const filterCategoryFoodOrFood = searchText => new Promise((resolve, reject) => {
-    Realm.open(databaseOptions)
-    .then(realm => {
-        //Lọc theo loại món ăn
-        let filterCategoryFood_Foods = realm.objects(CATEGORY_FOOD_SCHEMA).filtered(`name CONTAINS[c] "${searchText}"`); //[c] = case insensitive
-        if(filterCategoryFood_Foods.length < 1) {
-            //Lọc theo món ăn
-            filterCategoryFood_Foods = realm.objects(FOOD_SCHEMA).filtered(`name CONTAINS[c] "${searchText}"`); //[c] = case insensitiv
-            let allFoods = [];
-            console.log("filterCategoryFood_Foods - 1", filterCategoryFood_Foods);
-            if(filterCategoryFood_Foods.length > 0) {
-                filterCategoryFood_Foods.map(e => {
-                    allFoods.push({ food: e, quantity: 1 });
-                })
-            }
-            resolve({listData: allFoods, nameList: 'food'});
-        } else {
-            resolve({listData: filterCategoryFood_Foods, nameList: 'categoryFood'}); 
-        }
-    })
-    .catch(error => reject(error));
-});
 
 export const filterUnfinishedFood = () => new Promise((resolve,reject) => {
     Realm.open(databaseOptions)
     .then(realm => {
-        let filteredUnfinishedBillDetails = realm.objects(BILL_DETAIL_SCHEMA).filtered(`status = false`);
+        let filterUnpaidBills = realm.objects(BILL_SCHEMA).filtered(`status = false`);
         let filterUnfinishedFoods = [];
         // Duyệt tất cả chi tiết hóa đơn chưa hoàn thành và lấy ra món ăn thuộc chi tiết đó
-        if(filteredUnfinishedBillDetails.length > 0) {
-            filteredUnfinishedBillDetails.map(e => {
-                let food = realm.objectForPrimaryKey(FOOD_SCHEMA, e.idFood);
-                filterUnfinishedFoods.push({ food, billDetail: e });
+        if(filterUnpaidBills.length > 0) {
+            filterUnpaidBills.map(e => {
+                let filterUnfinishedBillDetails = realm.objects(BILL_DETAIL_SCHEMA).filtered(`idBill = ${e.id} AND status = false`);
+                if(filterUnfinishedBillDetails.length > 0) {
+                    filterUnfinishedBillDetails.map(e => {
+                        let food = realm.objectForPrimaryKey(FOOD_SCHEMA, e.idFood);
+                        filterUnfinishedFoods.push({ food, billDetail: e });
+                    })
+                }
             })
-        }        
-
+        }
+        
         resolve(filterUnfinishedFoods);
-    })
-    .catch(error => reject(error));
-});
-
-export const filterFinishedFoodByTable = table => new Promise((resolve,reject) => {
-    Realm.open(databaseOptions)
-    .then(realm => {
-        let filteredFinishedBillDetails = realm.objects(BILL_DETAIL_SCHEMA).filtered(`idTable = ${table} AND status = true`);
-        let filterFinishedFoods = [];
-        // Duyệt tất cả chi tiết hóa đơn chưa hoàn thành và lấy ra món ăn thuộc chi tiết đó
-        if(filteredFinishedBillDetails.length > 0) {
-            filteredFinishedBillDetails.map(e => {
-                let food = realm.objectForPrimaryKey(FOOD_SCHEMA, e.idFood);
-                filterFinishedFoods.push({ food, billDetail: e });
-            })
-        }        
-
-        resolve(filterFinishedFoods);
     })
     .catch(error => reject(error));
 });
@@ -530,6 +495,28 @@ export const queryAllBillDetail = () => new Promise((resolve, reject) => {
     .catch(error => reject(error));
 });
 
+export const filterFoodByTable = table => new Promise((resolve,reject) => {
+    Realm.open(databaseOptions)
+    .then(realm => {
+        let filteredBillDetails = realm.objects(BILL_DETAIL_SCHEMA).filtered(`idTable = ${table}`);
+        let filterFoods = [];
+        // Duyệt tất cả chi tiết hóa đơn chưa hoàn thành và lấy ra món ăn thuộc chi tiết đó
+        if(filteredBillDetails.length > 0) {
+            filteredBillDetails.map(e => {
+                let bill = realm.objects(BILL_SCHEMA).filtered(`id = ${e.idBill} AND status = false`);
+                if(bill.length > 0) {
+                    let food = realm.objectForPrimaryKey(FOOD_SCHEMA, e.idFood);
+                    filterFoods.push({ food, billDetail: e });
+                }
+                //filterFinishedFoods.push({ food, billDetail: e });
+            })
+        }        
+
+        resolve(filterFoods);
+    })
+    .catch(error => reject(error));
+}); 
+
 
 // -------------------------> BillSchema - BillDetailSchema <-------------------------
 export const deleteAllBillAndBillDetail = () => new Promise((resolve, reject) => {
@@ -582,6 +569,30 @@ export const filterBillByDay = day => new Promise((resolve, reject) => {
         })
         
         resolve(filterBillByDay);
+    })
+    .catch(error => reject(error));
+});
+
+
+// -----------------------------------> Filter <-----------------------------------
+export const filterCategoryFoodOrFood = searchText => new Promise((resolve, reject) => {
+    Realm.open(databaseOptions)
+    .then(realm => {
+        //Lọc theo loại món ăn
+        let filterCategoryFood_Foods = realm.objects(CATEGORY_FOOD_SCHEMA).filtered(`name CONTAINS[c] "${searchText}"`); //[c] = case insensitive
+        if(filterCategoryFood_Foods.length < 1) {
+            //Lọc theo món ăn
+            filterCategoryFood_Foods = realm.objects(FOOD_SCHEMA).filtered(`name CONTAINS[c] "${searchText}"`); //[c] = case insensitiv
+            let allFoods = [];
+            if(filterCategoryFood_Foods.length > 0) {
+                filterCategoryFood_Foods.map(e => {
+                    allFoods.push({ food: e, quantity: 1 });
+                })
+            }
+            resolve({listData: allFoods, nameList: 'food'});
+        } else {
+            resolve({listData: filterCategoryFood_Foods, nameList: 'categoryFood'}); 
+        }
     })
     .catch(error => reject(error));
 });

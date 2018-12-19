@@ -59,7 +59,7 @@ export default class MgnReport extends Component {
     const { listBill, listMonth, selectedMonth, selectedDay, chosenTypeReport, revenue } = this.state;
     const { navigation } = this.props;
     const { container, wrapHeader, wrapChoose, cmbMonth,
-            wrapTable, headerTable, headerWrapMaHD, headerWrapBan, headerWrapThoiGian, headerWrapTriGia, txtHeader,
+            headerTable, headerWrapMaHD, headerWrapBan, headerWrapThoiGian, headerWrapTriGia, txtHeader,
             wrapItem, txtMaHD, txtBan, txtThoiGian, txtTriGia, wrapDoanhThu, btnDoanhThu, txtDoanhThu
           } = styles;
 
@@ -130,48 +130,45 @@ export default class MgnReport extends Component {
           </View>
 
 
-          <View style={wrapTable}>
-            <View style={headerTable}>
-              <View style={headerWrapMaHD}>
-                <TouchableOpacity 
-                  onPress={() => {}}>                
-                  <Text style={txtHeader}>Mã HD</Text>
-                </TouchableOpacity>              
-              </View>           
-              <View style={headerWrapThoiGian}>
-                <TouchableOpacity 
-                  onPress={() => {}}>
-                  <Text style={txtHeader}>Thời gian</Text>
-                </TouchableOpacity>              
-              </View>
-              <View style={headerWrapTriGia}>
-                <TouchableOpacity 
-                  onPress={() => {}}>                
-                  <Text style={txtHeader}>Trị giá</Text>
-                </TouchableOpacity>              
-              </View>           
+          <View style={headerTable}>
+            <View style={headerWrapMaHD}>
+              <TouchableOpacity 
+                onPress={() => {}}>                
+                <Text style={txtHeader}>Mã HD</Text>
+              </TouchableOpacity>              
+            </View>           
+            <View style={headerWrapThoiGian}>
+              <TouchableOpacity 
+                onPress={() => {}}>
+                <Text style={txtHeader}>Thời gian</Text>
+              </TouchableOpacity>              
             </View>
-
-
-            <FlatList 
-              data={listBill}
-              renderItem={({item}) =>
-                <View style={wrapItem}>
-                  <View style={txtMaHD}>
-                    <Text>{item.id}</Text>
-                  </View>
-                  <View style={txtThoiGian}>
-                    <Text>{getFormattedTime(item.time) + " - " + getFormattedDate(item.time)}</Text>
-                  </View>  
-                  <View style={txtTriGia}>
-                    <Text>{item.total.getFormattedMoney(0)}</Text>
-                  </View>      
-                </View>
-              }      
-              keyExtractor={item => item.id.toString()}
-            />
+            <View style={headerWrapTriGia}>
+              <TouchableOpacity 
+                onPress={() => {}}>                
+                <Text style={txtHeader}>Trị giá</Text>
+              </TouchableOpacity>              
+            </View>           
           </View>
 
+
+          <FlatList 
+            data={listBill}
+            renderItem={({item}) =>
+              <View style={wrapItem}>
+                <View style={txtMaHD}>
+                  <Text>{item.id}</Text>
+                </View>
+                <View style={txtThoiGian}>
+                  <Text>{getFormattedTime(item.time) + " - " + getFormattedDate(item.time)}</Text>
+                </View>  
+                <View style={txtTriGia}>
+                  <Text>{item.total.getFormattedMoney(0)}</Text>
+                </View>      
+              </View>
+            }      
+            keyExtractor={item => item.id.toString()}
+          />
         </View>
         
 
@@ -206,11 +203,12 @@ const styles = StyleSheet.create({
 
   // ---> Table Header <---
   wrapTable: {
-    paddingHorizontal: 5,
-    marginTop: 10 
+ 
   },
   headerTable: {
-    flexDirection: 'row'
+    flexDirection: 'row',
+    paddingHorizontal: 5,
+    marginTop: 10
   },
   headerWrapMaHD: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   //headerWrapBan: { flex: 1, justifyContent: 'center', alignItems: 'center' },
@@ -222,6 +220,7 @@ const styles = StyleSheet.create({
   // ---> Table Item <---
   wrapItem: { 
     flexDirection: 'row',
+    paddingHorizontal: 5,
     marginTop: 5, 
     alignItems: 'center' 
   },

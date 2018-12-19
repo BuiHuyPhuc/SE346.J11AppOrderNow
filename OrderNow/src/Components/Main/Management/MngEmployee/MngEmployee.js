@@ -15,6 +15,8 @@ import PopUpEmployee from './PopUpEmployee';
 
 const { width, height } = Dimensions.get("window");
 
+var isMounted = false;
+
 class MngEmployee extends Component {
   constructor(props) {
     super(props);
@@ -38,12 +40,18 @@ class MngEmployee extends Component {
     .catch(error => this.setState({ listEmployee: [] }));
   }
 
+  onSearch(searchText) {
+    queryAllEmployee()
+    .then(listEmployee => this.setState({ listEmployee: listEmployee.filter(item => (item.position.search(searchText)  > -1) || (item.name.search(searchText) > -1)) }))
+    .catch(error => this.setState({ listEmployee: [] }));
+  }
+
   render() {
     const { listEmployee, search } = this.state;
     const { navigation, onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
             onPopupAddEmployee, onPopupUpdateDeleteEmployee } = this.props;
     const { container, wrapHeader, inputSearch, wrapFeature, btnFeature,
-            wrapTable, headerTable, headerWrapChucVu, headerWrapTen, headerWrapSdt, txtHeader,
+            headerTable, headerWrapChucVu, headerWrapTen, headerWrapSdt, txtHeader,
             wrapItem, txtChucVu, txtTen, txtSdt 
           } = styles;
     return (
@@ -56,10 +64,16 @@ class MngEmployee extends Component {
         <View style={wrapHeader}>
           <TextInput 
             style={inputSearch}
-            placeholder="Search"
+            placeholder="Tìm kiếm chức vụ hoặc nhân viên ..."
             underlineColorAndroid='transparent'
             value={search}
-            onChangeText={text => this.setState({ search: text })}
+            onChangeText={text => {
+              this.setState({ search: text });
+              if(text == '')
+                this.onReloadData();
+              else
+                this.onSearch(text);
+            }}
           />
           <View style={wrapFeature}>
             <TouchableOpacity
@@ -74,52 +88,50 @@ class MngEmployee extends Component {
           </View>
         </View>
 
-        <View style={wrapTable}>
-          <View style={headerTable}>
-            <View style={headerWrapChucVu}>
-              <TouchableOpacity 
-                onPress={() => {}}>                
-                <Text style={txtHeader}>Chức vụ</Text>
-              </TouchableOpacity>              
-            </View>
-            <View style={headerWrapTen}>
-              <TouchableOpacity 
-                onPress={() => {}}>                
-                <Text style={txtHeader}>Tên nhân viên</Text>
-              </TouchableOpacity>              
-            </View>            
-            <View style={headerWrapSdt}>
-              <TouchableOpacity 
-                onPress={() => {}}>                
-                <Text style={txtHeader}>Số điện thoại</Text>
-              </TouchableOpacity>              
-            </View>           
+        <View style={headerTable}>
+          <View style={headerWrapChucVu}>
+            <TouchableOpacity 
+              onPress={() => {}}>                
+              <Text style={txtHeader}>Chức vụ</Text>
+            </TouchableOpacity>              
           </View>
-
-          <FlatList
-            data={listEmployee}
-            renderItem={({item}) =>
-              <TouchableOpacity 
-                style={wrapItem}
-                onPress={() => {
-                  onShowPopupUpdateDelete();
-                  onPopupUpdateDeleteEmployee(item);
-                }}
-              >
-              <View style={txtChucVu}>
-                <Text>{item.position}</Text>
-              </View>
-              <View style={txtTen}>
-                <Text>{item.name}</Text>
-              </View>
-              <View style={txtSdt}>
-                <Text>{item.phone}</Text>
-              </View>       
-              </TouchableOpacity> 
-            }
-            keyExtractor={item => item.id.toString()}
-          />
+          <View style={headerWrapTen}>
+            <TouchableOpacity 
+              onPress={() => {}}>                
+              <Text style={txtHeader}>Tên nhân viên</Text>
+            </TouchableOpacity>              
+          </View>            
+          <View style={headerWrapSdt}>
+            <TouchableOpacity 
+              onPress={() => {}}>                
+              <Text style={txtHeader}>Số điện thoại</Text>
+            </TouchableOpacity>              
+          </View>           
         </View>
+
+        <FlatList
+          data={listEmployee}
+          renderItem={({item}) =>
+            <TouchableOpacity 
+              style={wrapItem}
+              onPress={() => {
+                onShowPopupUpdateDelete();
+                onPopupUpdateDeleteEmployee(item);
+              }}
+            >
+            <View style={txtChucVu}>
+              <Text>{item.position}</Text>
+            </View>
+            <View style={txtTen}>
+              <Text>{item.name}</Text>
+            </View>
+            <View style={txtSdt}>
+              <Text>{item.phone}</Text>
+            </View>       
+            </TouchableOpacity> 
+          }
+          keyExtractor={item => item.id.toString()}
+        />
 
         <PopUpEmployee />
       </View>
@@ -158,12 +170,10 @@ const styles = StyleSheet.create({
     height: 32
   },
   // ---> Table Header <---
-  wrapTable: {
+  headerTable: {
+    flexDirection: 'row',
     paddingHorizontal: 5,
     marginTop: 10 
-  },
-  headerTable: {
-    flexDirection: 'row'
   },
   headerWrapChucVu: { flex: 2, justifyContent: 'center', alignItems: 'center' },
   headerWrapTen: { flex: 4, justifyContent: 'center', alignItems: 'center' },
@@ -174,6 +184,7 @@ const styles = StyleSheet.create({
   // ---> Table Item <---
   wrapItem: { 
     flexDirection: 'row',
+    paddingHorizontal: 5,
     marginTop: 5, 
     alignItems: 'center' 
   },

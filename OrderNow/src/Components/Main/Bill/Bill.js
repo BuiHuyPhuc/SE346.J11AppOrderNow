@@ -23,6 +23,10 @@ export default class Bill extends Component {
     })
   }
 
+  componentWillUnmount() {
+    this.isCancelled = true;
+  }
+
   onReloadData() {
     filterUnpaidBill()
     .then(listUnpaidBill => this.setState({ listUnpaidBill }))
@@ -50,6 +54,12 @@ export default class Bill extends Component {
     )    
   }
 
+  onSearch(searchText) {
+    filterUnpaidBill()
+    .then(listUnpaidBill => this.setState({ listUnpaidBill: listUnpaidBill.filter(item => item.table === parseInt(searchText)) }))
+    .catch(error => this.setState({ listUnpaidBill: [] }));
+  }
+
   render() {
     const { listUnpaidBill, search } = this.state;
     const { navigation } = this.props;
@@ -61,10 +71,16 @@ export default class Bill extends Component {
         <View style={wrapSearch}>
           <TextInput 
             style={inputSearch}
-            placeholder="Search"
+            placeholder="Tìm kiếm bàn ..."
             underlineColorAndroid='transparent'
             value={search}
-            onChangeText={text => this.setState({ search: text })}
+            onChangeText={text => {
+              this.setState({ search: text })
+              if(text == '')
+                this.onReloadData();
+              else
+                this.onSearch(text);
+            }}
           />
         </View>       
 

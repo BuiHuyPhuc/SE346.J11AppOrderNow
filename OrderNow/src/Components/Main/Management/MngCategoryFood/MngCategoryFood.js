@@ -37,13 +37,19 @@ class MngCategoryFood extends Component {
     .then(listCategoryFood_Foods => this.setState({ listCategoryFood_Foods }))
     .catch(error => this.setState({ listCategoryFood_Foods: [] }));
   }
+
+  onSearch(searchText) {
+    queryAllCategoryFoodAndFoods()
+    .then(listCategoryFood_Foods => this.setState({ listCategoryFood_Foods: listCategoryFood_Foods.filter(item => item.categoryFood.name.search(searchText) > -1) }))
+    .catch(error => this.setState({ listCategoryFood_Foods: [] }));
+  }
   
   render() {
     const { listCategoryFood_Foods, search } = this.state;
     const { navigation, onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
             onPopupAddCategoryFood, onPopupUpdateDeleteCategoryFood } = this.props;
     const { container, wrapHeader, inputSearch, wrapFeature, btnFeature, 
-            wrapTable, headerTable, headerWrapLoai, headerWrapSoLuong, txtHeader,
+            headerTable, headerWrapLoai, headerWrapSoLuong, txtHeader,
             wrapItem, txtLoai, txtSoLuong 
           } = styles;
     return (
@@ -56,10 +62,16 @@ class MngCategoryFood extends Component {
         <View style={wrapHeader}>
           <TextInput 
             style={inputSearch}
-            placeholder="Search"
+            placeholder="Tìm kiếm loại món ăn ..."
             underlineColorAndroid='transparent'
             value={search}
-            onChangeText={text => this.setState({ search: text })}
+            onChangeText={text => {
+              this.setState({ search: text });
+              if(text == '')
+                this.onReloadData();
+              else
+                this.onSearch(text);
+            }}
           />
           <View style={wrapFeature}>
             <TouchableOpacity
@@ -74,44 +86,42 @@ class MngCategoryFood extends Component {
           </View>
         </View>
 
-        <View style={wrapTable}>
-          <View style={headerTable}>
-            <View style={headerWrapLoai}>
-              <TouchableOpacity 
-                onPress={() => {}}>                
-                <Text style={txtHeader}>Loại món</Text>
-              </TouchableOpacity>              
-            </View>
-            <View style={headerWrapSoLuong}>
-              <TouchableOpacity 
-                onPress={() => {}}>
-                <Text style={txtHeader}>Số lượng món</Text>
-              </TouchableOpacity>              
-            </View>           
+        <View style={headerTable}>
+          <View style={headerWrapLoai}>
+            <TouchableOpacity 
+              onPress={() => {}}>                
+              <Text style={txtHeader}>Loại món</Text>
+            </TouchableOpacity>              
           </View>
+          <View style={headerWrapSoLuong}>
+            <TouchableOpacity 
+              onPress={() => {}}>
+              <Text style={txtHeader}>Số lượng món</Text>
+            </TouchableOpacity>              
+          </View>           
+        </View>
 
-        
-          <FlatList
-            data={listCategoryFood_Foods}
-            renderItem={({item}) =>
-              <TouchableOpacity 
-                style={wrapItem}
-                onPress={() => {
-                  onShowPopupUpdateDelete();
-                  onPopupUpdateDeleteCategoryFood(item.categoryFood);
-                }}
-              >
-                <View style={txtLoai}>
-                  <Text>{item.categoryFood.name}</Text>
-                </View>
-                <View style={txtSoLuong}>
-                  <Text>{item.foods.length}</Text>
-                </View>       
-              </TouchableOpacity> 
-            }
-            keyExtractor={item => item.categoryFood.id.toString()}
-          />                                
-        </View>  
+      
+        <FlatList
+          data={listCategoryFood_Foods}
+          renderItem={({item}) =>
+            <TouchableOpacity 
+              style={wrapItem}
+              onPress={() => {
+                onShowPopupUpdateDelete();
+                onPopupUpdateDeleteCategoryFood(item.categoryFood);
+              }}
+            >
+              <View style={txtLoai}>
+                <Text>{item.categoryFood.name}</Text>
+              </View>
+              <View style={txtSoLuong}>
+                <Text>{item.foods.length}</Text>
+              </View>       
+            </TouchableOpacity> 
+          }
+          keyExtractor={item => item.categoryFood.id.toString()}
+        />   
         
         <PopUpCategoryFood />
       </View>
@@ -150,11 +160,12 @@ const styles = StyleSheet.create({
   },
   // ---> Table Header <---
   wrapTable: {
-    paddingHorizontal: 5,
-    marginTop: 10
+
   },
   headerTable: {
-    flexDirection: 'row'
+    flexDirection: 'row',
+    paddingHorizontal: 5,
+    marginTop: 10
   },
   headerWrapLoai: { flex: 2, justifyContent: 'center', alignItems: 'center' },
   headerWrapSoLuong: { flex: 1, justifyContent: 'center', alignItems: 'center' },
@@ -164,6 +175,7 @@ const styles = StyleSheet.create({
   // ---> Table Item <---
   wrapItem: { 
     flexDirection: 'row',
+    paddingHorizontal: 5,
     marginTop: 5, 
     alignItems: 'center'
   },

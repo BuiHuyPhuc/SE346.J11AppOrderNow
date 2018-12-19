@@ -9,8 +9,6 @@ import { connect } from 'react-redux';
 import SignIn from './SignIn';
 import AppOrderNow from './AppOrderNow';
 
-import Home from './Main/Home/Home';
-import CategoryDetail from './Main/Home/CategoryDetail';
 import Main from './Main/Home/Main';
 import Order from './Main/Order/Order';
 import Bill from './Main/Bill/Bill';
@@ -36,13 +34,6 @@ const { height } = Dimensions.get('window');
 export const SignInStack = createStackNavigator({
 	Screen_SignIn: SignIn,
 	Screen_AppOrderNow: AppOrderNow
-}, {
-	headerMode: 'none'
-});
-
-export const HomeStack = createStackNavigator({
-	Screen_Home: Home,
-	Screen_CategoryDetail: CategoryDetail
 }, {
 	headerMode: 'none'
 });
