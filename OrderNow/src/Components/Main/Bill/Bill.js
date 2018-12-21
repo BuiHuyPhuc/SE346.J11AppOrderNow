@@ -9,6 +9,7 @@ import { filterUnpaidBill, updateBill } from './../../../Database/All_Schemas';
 import getFormattedMoney from './../../../Api/FormattedMoney';
 
 const { width, height } = Dimensions.get("window");
+var isMouted = false;
 
 export default class Bill extends Component {
   constructor(props) {
@@ -18,13 +19,10 @@ export default class Bill extends Component {
       search: ''
     };
     this.onReloadData();
-    realm.addListener('change', () => {
-      this.onReloadData();
-    })
   }
 
   componentWillUnmount() {
-    this.isCancelled = true;
+    isMouted = false;
   }
 
   onReloadData() {
@@ -119,6 +117,15 @@ export default class Bill extends Component {
         
       </View>
     );
+  }
+
+  componentDidMount() {
+    isMouted = true;
+
+    realm.addListener('change', () => {
+      if(isMouted)
+        this.onReloadData();           
+    });
   }
 }
 

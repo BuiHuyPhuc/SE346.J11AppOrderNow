@@ -3,20 +3,44 @@ import {
   StyleSheet, Text, View, TouchableOpacity, TextInput, Image
 } from 'react-native';
 
+import realm from './../Database/All_Schemas';
+import { createAdmin, signInEmployee } from './../Database/All_Schemas';
+import { insertEmployee, insertTable, insertCategoryFood, insertFood, insertBill, insertBillDetail } from './../Database/CreateDatabaseForTest';
+
 import { connect } from 'react-redux';
 import { onEmployeeSignedIn } from './../Redux/ActionCreators';
 
-import { signInEmployee } from './../Database/All_Schemas';
-
+var isMouted = false;
 let logoIcon = require('./../Media/Temp/default.png');
 
 class SignIn extends Component {
   constructor(props) {
     super(props);
-    this.state = { 
+    this.state = {
+        isCreateAdmin: false,
         username: '', 
         password: ''
     };
+    this.onCreateAdmin();
+  }
+
+  componentWillUnmount() {
+    isMouted = false;
+  }
+
+  onCreateAdmin() {
+    createAdmin()
+    .then(isCreateAdmin => this.setState({ isCreateAdmin }))
+    .catch(error => alert('Tạo database lỗi!'));
+  }
+
+  onCreateDatabase() {
+    insertTable();
+    insertCategoryFood();
+    insertFood();
+    insertBill();
+    insertBillDetail();
+    insertEmployee();
   }
 
   onSignIn(username, password) {
@@ -34,8 +58,19 @@ class SignIn extends Component {
   }
 
   render() {
-    const { username, password } = this.state;
+    const { username, password, isCreateAdmin } = this.state;
     const { container, wrapLogo, txtLogo, imgLogo, textInput, btnChange, btnText } = styles;
+
+    const btnCreateDatabase = isCreateAdmin ? null :
+    (
+      <TouchableOpacity 
+        style={btnChange}
+        onPress={() => this.onCreateDatabase()}
+      >
+        <Text style={btnText}>Tạo dữ liệu trước khi sử dụng</Text>
+      </TouchableOpacity>
+    )
+
     return (
       <View style={container}>
         <View style={wrapLogo}>
@@ -48,6 +83,9 @@ class SignIn extends Component {
         </View>
         
         <View style={{ marginTop: 50 }}>
+
+          {btnCreateDatabase}
+
           <TextInput
               style={textInput}
               placeholder="Nhập tài khoản"
@@ -74,6 +112,15 @@ class SignIn extends Component {
         </View>
       </View>
     );
+  }
+
+  componentDidMount() {
+    isMouted = true;
+
+    realm.addListener('change', () => {
+      if(isMouted)
+        this.onCreateAdmin();          
+    });
   }
 }
 
@@ -117,6 +164,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     backgroundColor: '#2ABB9C',
     borderRadius: 20,
+    marginBottom: 10,
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'stretch'

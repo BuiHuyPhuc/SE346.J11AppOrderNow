@@ -15,6 +15,7 @@ import PopUpFood from './PopUpFood';
 import getFormattedMoney from './../../../../Api/FormattedMoney';
 
 const { width, height } = Dimensions.get("window");
+var isMouted = false;
 
 class MngFood extends Component {
   constructor (props) {
@@ -24,13 +25,10 @@ class MngFood extends Component {
       search: ''
     };  
     this.onReloadData();
-    realm.addListener('change', () => {
-      this.onReloadData();           
-    });
   }
 
   componentWillUnmount() {
-    this.isCancelled = true;
+    isMouted = false;
   }
 
   onReloadData() {
@@ -140,6 +138,15 @@ class MngFood extends Component {
         <PopUpFood />
       </View>
     );
+  }
+
+  componentDidMount() {
+    isMouted = true;
+
+    realm.addListener('change', () => {
+      if(isMouted)
+        this.onReloadData();           
+    });
   }
 }
 

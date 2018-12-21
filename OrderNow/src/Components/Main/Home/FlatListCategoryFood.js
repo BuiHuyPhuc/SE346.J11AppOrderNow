@@ -1,17 +1,19 @@
 import React, { Component } from 'react';
 import {
-	StyleSheet, View, Text, TouchableOpacity, Image, FlatList
+	StyleSheet, View, Text, TouchableOpacity, Image, FlatList, Dimensions
 } from 'react-native';
 
-import SourceImage from './../../../Api/SourceImage';
+//let monnuongIcon = require('./../../../Media/Category/mon-nuong.png');
+//const imgMonNuong = SourceImage(monnuongIcon);
 
-let monnuongIcon = require('./../../../Media/Category/mon-nuong.png');
-const imgMonNuong = SourceImage(monnuongIcon);
+import linkImageDefault from './../../../Api/LinkImageDefault';
+
+const { width, height } = Dimensions.get("window");
 
 export default class FlatListCategoryFood extends Component {
 	render() {
 		const { listCategoryFood, onNavigationFood } = this.props;
-		const { wrapItemCategory, wrapText, txtNameCategory } = styles;
+		const { wrapItemCategory, wrapButton, imgStyle, wrapText, txtNameCategory } = styles;
 		return(
 			<FlatList
 	          data={listCategoryFood}
@@ -19,12 +21,12 @@ export default class FlatListCategoryFood extends Component {
 	          renderItem={({item}) =>
 	            <View style={wrapItemCategory}>
 	              <TouchableOpacity
-	                style={{ width: imgMonNuong.imgWidth }}
+	                style={wrapButton}
 	                onPress={() => onNavigationFood(item.id)}
 	              >
 	                <Image
-	                  style={{ width: imgMonNuong.imgWidth, height: imgMonNuong.imgHeight }}
-	                  source={monnuongIcon}
+	                  style={imgStyle}
+	                  source={item.image == '' ? {uri: linkImageDefault} : {uri: item.image}}
 	                />                            
 	              </TouchableOpacity>
 	              <View style={wrapText}>
@@ -38,9 +40,18 @@ export default class FlatListCategoryFood extends Component {
 	}
 }
 
+const imgWidth = (width - 20) / 2;
+
 const styles = StyleSheet.create({
   wrapItemCategory: {
     paddingHorizontal: 5
+  },
+  wrapButton: {
+  	width: imgWidth,
+  },
+  imgStyle: {
+  	width: imgWidth,
+  	height: height / 5
   },
   wrapText: {
     padding: 5,

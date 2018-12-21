@@ -1,18 +1,22 @@
 import React, { Component } from 'react';
 import {
-	StyleSheet, View, Text, TouchableOpacity, Image, FlatList
+	StyleSheet, View, Text, TouchableOpacity, Image, FlatList, Dimensions
 } from 'react-native';
 
-import SourceImage from './../../../Api/SourceImage';
+import linkImageDefault from './../../../Api/LinkImageDefault';
+//import SourceImage from './../../../Api/SourceImage';
 import getFormattedMoney from './../../../Api/FormattedMoney';
 
-let monnuongIcon = require('./../../../Media/Category/mon-nuong.png');
-const imgMonNuong = SourceImage(monnuongIcon);
+//let monnuongIcon = require('./../../../Media/Category/mon-nuong.png');
+//const imgMonNuong = SourceImage(monnuongIcon);
+
+const { width, height } = Dimensions.get("window");
 
 export default class FlatListFood extends Component {
 	render() {
 		const { listFood, onIncrease, onDecrease, onInsertOrder } = this.props;
-		const { wrapListFood, wrapItemFood, wrapInfoFood, txtFood, wrapSoLuongFood, btnFood } = styles;
+		const { wrapListFood, wrapItemFood, imgStyle, 
+				wrapInfoFood, txtFood, wrapSoLuongFood, btnTang_Giam, btnThem } = styles;
 		
 		if(listFood == null)
 			return (<View />)
@@ -24,8 +28,8 @@ export default class FlatListFood extends Component {
 		        renderItem={({item}) =>
 		          <View style={wrapItemFood}>
 		            <Image
-		              style={{ width: imgMonNuong.imgWidth, height: imgMonNuong.imgHeight }} 
-		              source={monnuongIcon}
+		              style={imgStyle} 
+		              source={item.food.image == '' ? {uri: linkImageDefault} : {uri: item.food.image}}
 		            />
 		            
 		            <View style={wrapInfoFood}>
@@ -34,21 +38,21 @@ export default class FlatListFood extends Component {
 		              <View style={wrapSoLuongFood}>
 		                <Text style={txtFood}>Số lượng: </Text>
 		                <TouchableOpacity
-		                  style={[btnFood, { width: 30 }]}
+		                  style={btnTang_Giam}
 		                  onPress={() => onDecrease(item.food.id)}
 		                >
 		                  <Text style={txtFood}>-</Text>
 		                </TouchableOpacity>
 		                <Text style={txtFood}>{item.quantity}</Text>
 		                <TouchableOpacity
-		                  style={[btnFood, { width: 30 }]}
+		                  style={btnTang_Giam}
 		                  onPress={() => onIncrease(item.food.id)}
 		                >
 		                  <Text style={txtFood}>+</Text>
 		                </TouchableOpacity>
 		              </View>
 		              <TouchableOpacity
-		                style={[btnFood, { width: imgMonNuong.imgWidth, backgroundColor: '#B0B0B0' }]}
+		                style={btnThem}
 		                onPress={() => onInsertOrder(item)}
 		              >
 		                <Text style={txtFood}>Thêm món</Text>
@@ -63,6 +67,8 @@ export default class FlatListFood extends Component {
 	}
 }
 
+const imgWidth = (width - 20) / 2;
+
 const styles = StyleSheet.create({
   wrapListFood: {
     paddingHorizontal: 5
@@ -70,6 +76,10 @@ const styles = StyleSheet.create({
   wrapItemFood: {    
     flexDirection: 'row',
     marginTop: 5
+  },
+  imgStyle: {
+  	width: imgWidth,
+  	height: height / 5
   },
   wrapInfoFood: {
     marginLeft: 10,
@@ -82,8 +92,17 @@ const styles = StyleSheet.create({
   wrapSoLuongFood: {
     flexDirection: 'row'
   },
-  btnFood: {
+  btnTang_Giam: {
+  	width: 30,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  btnThem: {
+  	width: imgWidth,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#B0B0B0'
   }
 });
+
+//[btnFood, { width: imgWidth, backgroundColor: '#B0B0B0' }]

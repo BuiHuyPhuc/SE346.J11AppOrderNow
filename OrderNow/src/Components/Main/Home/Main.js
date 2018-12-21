@@ -9,18 +9,12 @@ import { queryAllCategoryFood, filterFoodByCategoryFoodId, insertNewBill, insert
 
 import { connect } from 'react-redux';
 
-import HeaderBack from './../HeaderBack';
 import HeaderHome from './HeaderHome';
-import SourceImage from './../../../Api/SourceImage';
-import getFormattedMoney from './../../../Api/FormattedMoney';
-
 import FlatListCategoryFood from './FlatListCategoryFood';
 import FlatListFood from './FlatListFood';
 
-let monnuongIcon = require('./../../../Media/Category/mon-nuong.png');
-const imgMonNuong = SourceImage(monnuongIcon);
-
 const { width, height } = Dimensions.get("window");
+var isMouted = false;
 
 class Main extends Component {
   constructor (props) {
@@ -32,9 +26,10 @@ class Main extends Component {
       isFilter: false,
     };
     this.onReloadData();
-    realm.addListener('change', () => {
-      this.state.isFilter ? this.onFilterData(this.props.search) : this.onReloadData();
-    })
+  }
+
+  componentWillUnmount() {
+    isMouted = false;
   }
 
   onBackCategoryFood() {
@@ -198,6 +193,15 @@ class Main extends Component {
         
       </View>
     );
+  }
+
+  componentDidMount() {
+    isMouted = true;
+
+    realm.addListener('change', () => {
+      if(isMouted)
+        this.state.isFilter ? this.onFilterData(this.props.search) : this.onReloadData();          
+    });
   }
 }
 

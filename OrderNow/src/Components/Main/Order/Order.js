@@ -8,9 +8,10 @@ import { filterUnfinishedFood, updateStatusBillDetail } from './../../../Databas
 
 import { getFormattedTime } from './../../../Api/FormattedDateTime';
 
-const { width, height } = Dimensions.get("window");
-
 let checkInactiveIcon = require('./../../../Media/Icon/check-inactive.png');
+
+const { width, height } = Dimensions.get("window");
+var isMouted = false;
 
 export default class Order extends Component {
   constructor(props) {
@@ -20,13 +21,10 @@ export default class Order extends Component {
       search: ''
     };
     this.onReloadData();
-    realm.addListener('change', () => {
-      this.onReloadData();
-    })
   }
 
   componentWillUnmount() {
-    this.isCancelled = true;
+    isMouted = false;
   }
 
   onReloadData() {
@@ -140,6 +138,15 @@ export default class Order extends Component {
 
       </View>
     );
+  }
+
+  componentDidMount() {
+    isMouted = true;
+
+    realm.addListener('change', () => {
+      if(isMouted)
+        this.onReloadData();           
+    });
   }
 }
 

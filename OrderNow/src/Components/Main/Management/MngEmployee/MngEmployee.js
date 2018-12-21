@@ -14,7 +14,6 @@ import HeaderBack from './../../HeaderBack';
 import PopUpEmployee from './PopUpEmployee';
 
 const { width, height } = Dimensions.get("window");
-
 var isMounted = false;
 
 class MngEmployee extends Component {
@@ -25,13 +24,10 @@ class MngEmployee extends Component {
       search: ''
     };
     this.onReloadData();
-    realm.addListener('change', () => {
-      this.onReloadData();           
-    });
   }
 
   componentWillUnmount() {
-    this.isCancelled = true;
+    isMounted = false;
   }
 
   onReloadData() {
@@ -137,6 +133,15 @@ class MngEmployee extends Component {
       </View>
     );
   }
+
+  componentDidMount() {
+    isMouted = true;
+
+    realm.addListener('change', () => {
+      if(isMouted)
+        this.onReloadData();           
+    });
+  }  
 }
 
 export default connect(null, { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,

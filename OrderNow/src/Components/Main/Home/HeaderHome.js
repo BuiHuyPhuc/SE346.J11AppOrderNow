@@ -9,7 +9,8 @@ import { queryAllTable } from './../../../Database/All_Schemas';
 import { connect } from 'react-redux';
 import { onChooseTable, onChangeSearch } from './../../../Redux/ActionCreators';
 
-const { width, height } = Dimensions.get("window")
+const { width, height } = Dimensions.get("window");
+var isMouted = false;
 
 class HeaderHome extends Component {
 	constructor (props) {
@@ -20,10 +21,11 @@ class HeaderHome extends Component {
 	    	searchText: ''
 	    };
 	    this.onReloadData();
-	    realm.addListener('change', () => {
-	      this.onReloadData();    
-	    });
     }
+
+	componentWillUnmount() {
+		isMouted = false;
+	}
 
     onReloadData() {
 	    queryAllTable()
@@ -87,6 +89,15 @@ class HeaderHome extends Component {
 	          </View>
 	        </View>
 		);
+	}
+
+	componentDidMount() {
+		isMouted = true;
+
+		realm.addListener('change', () => {
+			if(isMouted)
+				this.onReloadData();           
+		});
 	}
 }
 

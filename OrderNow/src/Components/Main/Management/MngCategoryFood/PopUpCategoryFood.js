@@ -9,7 +9,9 @@ import { insertNewCategoryFood, updateCategoryFood, deleteCategoryFood } from '.
 import { connect } from 'react-redux';
 import { onCancelPopup, onClickUpdate } from './../../../../Redux/ActionCreators';
 
-let monnuongIcon = require('./../../../../Media/Category/mon-nuong.png');
+import linkImageDefault from './../../../../Api/LinkImageDefault';
+
+//let monnuongIcon = require('./../../../../Media/Category/mon-nuong.png');
 
 class PopUpCategoryFood extends Component {
 	constructor(props) {
@@ -113,7 +115,7 @@ class PopUpCategoryFood extends Component {
 							</TouchableOpacity>
 							<Image 
 								style={imgLoaiMon}
-								source={monnuongIcon}
+								source={{uri: linkImageDefault}}
 							/>
 						</View>
 					</View>

@@ -14,6 +14,7 @@ import HeaderBack from './../../HeaderBack';
 import PopUpCategoryFood from './PopUpCategoryFood';
 
 const { width, height } = Dimensions.get("window");
+var isMouted = false;
 
 class MngCategoryFood extends Component {
   constructor (props) {
@@ -23,13 +24,10 @@ class MngCategoryFood extends Component {
       search: ''
     };
     this.onReloadData();
-    realm.addListener('change', () => {
-      this.onReloadData();           
-    });
   }
 
   componentWillUnmount() {
-    this.isCancelled = true;
+    isMouted = false;
   }
 
   onReloadData() {
@@ -126,6 +124,15 @@ class MngCategoryFood extends Component {
         <PopUpCategoryFood />
       </View>
     );
+  }
+
+  componentDidMount() {
+    isMouted = true;
+
+    realm.addListener('change', () => {
+      if(isMouted)
+        this.onReloadData();           
+    });
   }
 }
 

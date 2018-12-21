@@ -13,6 +13,7 @@ let checkInactiveIcon = require('./../../../Media/Icon/check-inactive.png');
 let checkActiveIcon = require('./../../../Media/Icon/check-active.png');
 
 const { width, height } = Dimensions.get("window");
+var isMouted = false;
 
 export default class BillDetail extends Component {
   constructor(props) {
@@ -21,9 +22,10 @@ export default class BillDetail extends Component {
       listFinishFood: []
     };
     this.onReloadData();
-    realm.addListener('change', () => {
-      this.onReloadData();
-    });
+  }
+
+  componentWillUnmount() {
+    isMouted = false;
   }
 
   onReloadData() {
@@ -95,6 +97,15 @@ export default class BillDetail extends Component {
         />
       </View>
     );
+  }
+
+  componentDidMount() {
+    isMouted = true;
+
+    realm.addListener('change', () => {
+      if(isMouted)
+        this.onReloadData();           
+    });
   }
 }
 

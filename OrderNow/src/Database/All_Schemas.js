@@ -151,6 +151,18 @@ export const signInEmployee = (username, password) => new Promise((resolve, reje
     .catch(error => reject(error));
 });
 
+export const createAdmin = () => new Promise((resolve, reject) => {
+    Realm.open(databaseOptions)
+    .then(realm => {
+        let admin = realm.objectForPrimaryKey(EMPLOYEE_SCHEMA, 1);
+        if(admin == null)
+            resolve(false);
+        else
+            resolve(true);
+    })
+    .catch(error => reject(error));
+});
+
 
 // -----------------------------------> TableSchema <-----------------------------------
 export const insertNewTable = newTable => new  Promise((resolve, reject) => {

@@ -12,12 +12,12 @@ import { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
 
 import HeaderBack from './../../HeaderBack';
 import PopUpTable from './PopUpTable';
-import SourceImage from './../../../../Api/SourceImage';
+//import SourceImage from './../../../../Api/SourceImage';
 
 const { width, height } = Dimensions.get("window");
-
+var isMouted = false;
 let tableIcon = require('./../../../../Media/Temp/table.png');
-const imgTable = SourceImage(tableIcon);
+//const imgTable = SourceImage(tableIcon);
 
 class MngTable extends Component {
   constructor (props) {
@@ -27,13 +27,10 @@ class MngTable extends Component {
       search: ''
     };
     this.onReloadData();
-    realm.addListener('change', () => {
-      this.onReloadData();           
-    });
   }
 
   componentWillUnmount() {
-    this.isCancelled = true;
+    isMouted = false;
   }
   
   onReloadData() {
@@ -53,7 +50,7 @@ class MngTable extends Component {
     const { navigation, onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
             onPopupAddTable, onPopupDeleteTable } = this.props;
     const { container, wrapHeader, inputSearch, wrapFeature, btnFeature ,            
-            wrapItemTable, wrapText, txtNameTable
+            wrapItemTable, wrapButton, imgStyle, wrapText, txtNameTable
           } = styles;
     return (
       <View style={container}>
@@ -95,14 +92,14 @@ class MngTable extends Component {
           renderItem={({item}) =>
             <View style={wrapItemTable}>
               <TouchableOpacity
-                style={{ width: imgTable.imgWidth }}
+                style={wrapButton}
                 onPress={() => {
                   onShowPopupUpdateDelete();
                   onPopupDeleteTable(item);
                 }}
               >
                 <Image
-                  style={{ width: imgTable.imgWidth, height: imgTable.imgHeight }}
+                  style={imgStyle}
                   source={tableIcon}
                 >                            
                 </Image>
@@ -120,10 +117,21 @@ class MngTable extends Component {
       </View>
     );
   }
+
+  componentDidMount() {
+    isMouted = true;
+
+    realm.addListener('change', () => {
+      if(isMouted)
+        this.onReloadData();           
+    });
+  }
 }
 
 export default connect(null, { onCancelPopup, onShowPopupAdd, onShowPopupUpdateDelete,
   onPopupAddTable, onPopupDeleteTable })(MngTable);
+
+const imgWidth = (width - 20) / 2;
 
 const styles = StyleSheet.create({
   container: {
@@ -155,7 +163,15 @@ const styles = StyleSheet.create({
   },
   // ---> List Table <---
   wrapItemTable: {
-    paddingHorizontal: 5
+    paddingHorizontal: 5,
+    marginVertical: 5
+  },
+  wrapButton: {
+    width: imgWidth
+  },
+  imgStyle: {
+    width: imgWidth,
+    height: height / 5
   },
   wrapText: {
     padding: 5,
