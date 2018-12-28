@@ -27,8 +27,8 @@ export default class Bill extends Component {
 
   onReloadData() {
     filterUnpaidBill()
-    .then(listUnpaidBill => this.setState({ listUnpaidBill }))
-    .catch(error => this.setState({ listUnpaidBill: [] }));
+      .then(listUnpaidBill => this.setState({ listUnpaidBill }))
+      .catch(error => this.setState({ listUnpaidBill: [] }));
   }
 
   onPaidBill(bill, table) {
@@ -39,82 +39,75 @@ export default class Bill extends Component {
         {
           text: 'Yes', onPress: () => {
             updateBill(bill)
-            .then(() => alert('Thanh toán thành công'))
-            .catch(error => alert('Thanh toán thất bại'));
+              .then(() => alert('Thanh toán thành công'))
+              .catch(error => alert('Thanh toán thất bại'));
           }
         },
         {
-          text: 'No', onPress: () => {},
+          text: 'No', onPress: () => { },
           style: 'cancel'
-        }       
+        }
       ],
       { cancelable: true }
-    )    
+    )
   }
 
   onSearch(searchText) {
     filterUnpaidBill()
-    .then(listUnpaidBill => this.setState({ listUnpaidBill: listUnpaidBill.filter(item => item.table === parseInt(searchText)) }))
-    .catch(error => this.setState({ listUnpaidBill: [] }));
+      .then(listUnpaidBill => this.setState({ listUnpaidBill: listUnpaidBill.filter(item => item.table === parseInt(searchText)) }))
+      .catch(error => this.setState({ listUnpaidBill: [] }));
   }
 
   render() {
     const { listUnpaidBill, search } = this.state;
     const { navigation } = this.props;
     const { container, wrapSearch, inputSearch,
-            wrapList, wrapItem, wrapLeftItem, wrapRightItem, txtTitle, btnXem, btnThanhtoan, btnText 
-          } = styles;
+      wrapItem, txtTitle, txtTongTien, btnThanhtoan, btnText
+    } = styles;
     return (
       <View style={container}>
         <View style={wrapSearch}>
-          <TextInput 
+          <TextInput
             style={inputSearch}
-            placeholder="Tìm kiếm bàn ..."
+            placeholder="Tìm kiếm bàn"
             underlineColorAndroid='transparent'
             value={search}
             onChangeText={text => {
               this.setState({ search: text })
-              if(text == '')
+              if (text == '')
                 this.onReloadData();
               else
                 this.onSearch(text);
             }}
           />
-        </View>       
+        </View>
 
 
         <FlatList
-          style={wrapList}
           data={listUnpaidBill}
-          renderItem={({item}) => 
+          numColumns={2}
+          renderItem={({ item }) =>
             <View style={wrapItem}>
-              <View style={wrapLeftItem}>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('Screen_BillDetail', { table: item.table })}
+              >
                 <Text style={txtTitle}>Bàn {item.table}</Text>
-                <TouchableOpacity 
-                  style={btnXem}
-                  onPress={() => navigation.navigate('Screen_BillDetail', { table: item.table })}>
-                  <Text style={btnText}>Xem chi tiết</Text>
-                </TouchableOpacity>
-              </View>
-
-              <View style={wrapRightItem}>
-                <Text style={txtTitle}>Tổng tiền: {item.total.getFormattedMoney(0)} VNĐ</Text>
-                <TouchableOpacity 
+                <Text style={txtTongTien}>{item.total.getFormattedMoney(0)} VNĐ</Text>
+                <TouchableOpacity
                   style={btnThanhtoan}
                   onPress={() => this.onPaidBill(
-                      {id: item.bill.id, status: true, time: new Date(), total: item.total},
-                      item.table
-                    )
-                  }
+                    { id: item.bill.id, status: true, time: new Date(), total: item.total },
+                    item.table
+                  )}
                 >
                   <Text style={btnText}>Thanh toán</Text>
                 </TouchableOpacity>
-              </View>
-            </View>  
-          }
+              </TouchableOpacity>
+            </View>
+            }
           keyExtractor={item => item.bill.id.toString()}
         />
-        
+
       </View>
     );
   }
@@ -123,43 +116,63 @@ export default class Bill extends Component {
     isMouted = true;
 
     realm.addListener('change', () => {
-      if(isMouted)
-        this.onReloadData();           
+      if (isMouted)
+        this.onReloadData();
     });
   }
 }
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: 'white',
     flex: 1
   },
   // ---> Header <---
   wrapSearch: {
-    paddingHorizontal: 10
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    marginBottom: 10
   },
   inputSearch: {
-    width: width - 20,
-    height: height / 16,
+    height: height / 20,
     backgroundColor: 'whitesmoke',
     padding: 10,
-    marginVertical: 5
+    borderRadius: 5,
   },
   // ---> List bill <---
-  wrapList: { 
-    paddingHorizontal: 5 
+  wrapItem: {
+    width: (width - 40) / 2,
+    padding: 10,
+    margin: 10,
+		borderRadius: 5,
+		backgroundColor: 'white',
+		elevation: 3
   },
-  wrapItem: { 
-    flexDirection: 'row', 
-    borderWidth: 1, 
-    marginTop: 5 
+ 
+  txtTitle: {
+    alignSelf: 'center',
+    color: 'black',
+    marginBottom: 10,
+    fontSize:18,
+    fontWeight:'bold'
+  }, 
+  txtTongTien: {
+    alignSelf: 'center',
+    color: 'black',
+    marginBottom: 10,
+    fontSize:18,
+  },  
+  btnThanhtoan: { 
+    alignSelf: 'center',
+    justifyContent: 'center',
+		alignItems: 'center',
+		backgroundColor: '#fe5644',
+		width: width / 3,
+		height: height / 24,
+		borderRadius: 5,
   },
-  wrapLeftItem: { flex: 3, borderRightWidth: 1, justifyContent: 'center', alignItems: 'center' },
-  wrapRightItem: { flex: 7, justifyContent: 'center', alignItems: 'center' },
-  txtTitle: { 
-    fontSize: 24, 
-    paddingVertical: 5 
-  },
-  btnXem: { paddingHorizontal: 5, marginBottom: 5, backgroundColor: '#2ABB9C' },
-  btnThanhtoan: { paddingHorizontal: 65, marginBottom: 5, backgroundColor: '#2ABB9C' },
-  btnText: { fontSize: 18 }
+  btnText: { 
+    color:'white' ,
+    fontWeight:'bold'
+  }
 });

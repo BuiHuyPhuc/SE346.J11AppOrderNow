@@ -1,15 +1,27 @@
 import React, { Component } from 'react';
 import {
-  StyleSheet, Text, View, TouchableOpacity, TextInput, Image
+  StyleSheet, Text, View, TouchableOpacity, Dimensions, TextInput, Image
 } from 'react-native';
+import ImagePicker from 'react-native-image-picker';
 
 import { connect } from 'react-redux';
+import { onEmployeeSignedIn } from './../../../Redux/ActionCreators';
 
 import { updateEmployee } from './../../../Database/All_Schemas';
 
 import HeaderBack from './../../Main/HeaderBack';
 
 let profileIcon = require('./../../../Media/Temp/profile.png');
+
+const options = {
+  title: 'Select Avatar',
+  storageOptions: {
+    skipBackup: true,
+    path: 'images',
+  },
+};
+
+const { height, width } = Dimensions.get('window');
 
 class Info extends Component {
   constructor(props) {
@@ -21,91 +33,124 @@ class Info extends Component {
       name: employee.name,
       position: employee.position,
       phone: employee.phone,
-      image: employee.image
+      image: employee.image,
     };
   }
+
+  onImagePicker() {
+		ImagePicker.showImagePicker(options, (response) => {
+			if (response.didCancel) {
+			} else if (response.error) {
+			} else if (response.customButton) {
+			} else {
+				const source = response.uri;
+		
+				// You can also display the image using data:
+				// const source = { uri: 'data:image/jpeg;base64,' + response.data };
+		
+				this.setState({
+					image: source,
+				});
+			}
+		});
+	}
+
+	onAdd(newCategoryFood) {
+		if(this.state.name == '')
+			return alert('Vui lòng điền đầy đủ thông tin!');
+		insertNewCategoryFood({
+	      id: Math.floor(Date.now() / 1000),
+	      name: newCategoryFood.name,
+	      image: newCategoryFood.image
+	    })
+	    .then(categoryFood => alert(`Thêm ${categoryFood.name} thành công!`))
+	    .catch(error => alert(`Thêm thất bại!`));
+		this.props.onCancelPopup();
+	}
 
   onUpdate(employee) {
     updateEmployee(employee)
       .then(() => alert('Sửa thành công'))
       .catch(error => alert('Sửa thất bại'));
+    this.props.onEmployeeSignedIn(employee);
   }
 
   render() {
     const { username, password, name, position, phone, image } = this.state;
     const { navigation, employee } = this.props;
-    const { container, wrapper, textInput, txtPosotion,
-            wrapBtnImage, btnChangeImage, imgProfile, btnChange, btnText,
-          } = styles;
+    const { container, wrapper, textInput, txtName,
+      wrapBtnImage, btnChangeImage, imgProfile, btnChange, btnText,
+    } = styles;
     return (
       <View style={container}>
-        <HeaderBack 
+        <HeaderBack
           navigation={navigation}
-          name="Info User"
+          name="Thông tin tài khoản"
         />
 
         <View style={wrapper}>
-          <Text style={txtPosotion}>Chức vụ: {position}</Text>
-          <TextInput
-              style={textInput}
-              placeholder="Nhập tài khoản của bạn"
-              autoCapitalize="none"
-              editable={false}
-              underlineColorAndroid='transparent'
-              value={username}
-              onChangeText={text => this.setState({ username: text })}
-          />
-          <TextInput
-              style={textInput}
-              placeholder="Nhập mật khẩu của bạn"
-              autoCapitalize="none"
-              secureTextEntry
-              underlineColorAndroid='transparent'
-              value={password}
-              onChangeText={text => this.setState({ password: text })}
-          />
-          <TextInput
-              style={textInput}
-              placeholder="Nhập họ và tên của bạn"
-              autoCapitalize="none"
-              underlineColorAndroid='transparent'
-              value={name}
-              onChangeText={text => this.setState({ name: text })}
-          />
-          <TextInput
-              style={textInput}
-              placeholder="Nhập số điện thoại của bạn"
-              autoCapitalize="none"
-              underlineColorAndroid='transparent'
-              value={phone}
-              onChangeText={text => this.setState({ phone: text })}
-          />
           <View style={wrapBtnImage}>
+            <Image
+              style={imgProfile}
+              source={image == '' ? profileIcon : {uri: image}}
+            />
+            <Text style={txtName}>{name}</Text>
             <TouchableOpacity
               style={btnChangeImage}
-              onPress={() => {}}
+              onPress={() => this.onImagePicker()}
             >
-              <Text style={btnText}>Thay đổi ảnh đại diện</Text>
+              <Text style={{ color: '#fe5644' }}>Thay đổi ảnh</Text>
             </TouchableOpacity>
-            <Image 
-              style={imgProfile}
-              source={profileIcon}
-            />
-          </View>
-        </View>
 
-        <TouchableOpacity 
-          style={btnChange}
-          onPress={() => this.onUpdate({ 
-              id: employee.id, password, name, position, 
+          </View>
+
+          <TextInput
+            style={textInput}
+            placeholder="Nhập tài khoản của bạn"
+            autoCapitalize="none"
+            editable={false}
+            underlineColorAndroid='transparent'
+            value={username}
+            onChangeText={text => this.setState({ username: text })}
+          />
+          <TextInput
+            style={textInput}
+            placeholder="Nhập mật khẩu của bạn"
+            autoCapitalize="none"
+            secureTextEntry
+            underlineColorAndroid='transparent'
+            value={password}
+            onChangeText={text => this.setState({ password: text })}
+          />
+          <TextInput
+            style={textInput}
+            placeholder="Nhập họ và tên của bạn"
+            autoCapitalize="none"
+            underlineColorAndroid='transparent'
+            value={name}
+            onChangeText={text => this.setState({ name: text })}
+          />
+          <TextInput
+            style={textInput}
+            placeholder="Nhập số điện thoại của bạn"
+            autoCapitalize="none"
+            underlineColorAndroid='transparent'
+            value={phone}
+            onChangeText={text => this.setState({ phone: text })}
+          />
+          <TouchableOpacity
+            style={btnChange}
+            onPress={() => this.onUpdate({
+              id: employee.id, password, name, position,
               decentralization: position === "Quản lý" ? true : false,
               phone, image
             })
-          }
-        >
-          <Text style={btnText}>Lưu thông tin</Text>
-        </TouchableOpacity>
+            }
+          >
+            <Text style={btnText}>Lưu thông tin</Text>
+          </TouchableOpacity>
 
+        </View>
       </View>
     );
   }
@@ -117,68 +162,66 @@ function mapStateToProps(state) {
   }
 }
 
-export default connect(mapStateToProps)(Info);
+export default connect(mapStateToProps, { onEmployeeSignedIn })(Info);
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'whitesmoke',
-    borderRightWidth: 2,
+    backgroundColor: 'white',
+    borderRightWidth: 1,
     borderColor: 'whitesmoke',
-    justifyContent: 'space-between'
   },
   wrapper: {
-    flex: 10,
-    justifyContent: 'center',
-    marginHorizontal: 20
+    marginHorizontal: 20,
+    justifyContent:'center'
   },
   textInput: {
-    height: 45,
-    backgroundColor: 'whitesmoke',
-    paddingLeft: 20,
-    borderRadius: 20,
+    height: height/16,
+		backgroundColor: 'whitesmoke',
+		padding: 10,
+		borderRadius: 5,
     marginBottom: 10,
-    borderColor: '#2ABB9C',
-    borderWidth: 1
+    opacity:0.8
   },
-  txtPosotion: {
-    fontSize: 24,
-    marginBottom: 10,
-    color: 'black'
+  txtName: {
+    color: 'black',
+    fontSize:22,
+    fontWeight: 'bold',
+    marginBottom:5
   },
   wrapBtnImage: {
-    flexDirection: 'row',
+    marginVertical: 20,
     justifyContent: 'center',
-    marginVertical: 10
+    alignItems: 'center',
   },
   btnChangeImage: {
-    marginHorizontal: 5,
-    backgroundColor: '#2ABB9C',
-    borderRadius: 20,
-    width: 190,
-    height: 45,
-    alignItems: 'center',
+    borderRadius: 5,
+    width: width / 2,
+    height: height / 28,
+    alignSelf: 'center',
     justifyContent: 'center',
-    alignSelf: 'stretch'
+    alignItems: 'center'
   },
   imgProfile: {
-    width: 75,
-    height: 50,
-    resizeMode: 'stretch'
+    width: height / 10,
+    height: height / 10,
+    resizeMode: 'cover',
+    marginBottom: 10,
+    borderRadius: 50
   },
   btnChange: {
-    backgroundColor: '#2ABB9C',
-    borderRadius: 20,
-    height: 45,
-    alignItems: 'center',
     justifyContent: 'center',
-    alignSelf: 'stretch',
-    marginHorizontal: 20,
-    marginBottom: 20
+    alignItems: 'center',
+    alignSelf:'center',
+		backgroundColor: '#fe5644',
+		width: width / 2,
+		height: height / 16,
+    borderRadius: 5,
+    marginTop:10
   },
   btnText: {
-    color: 'whitesmoke', 
-    fontWeight: '600', 
-    paddingHorizontal: 20
+    color: 'white',
+    fontWeight:'bold',
+    fontSize:14
   }
 });

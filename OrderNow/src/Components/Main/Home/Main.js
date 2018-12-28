@@ -22,7 +22,7 @@ class Main extends Component {
     this.state = {
       listData: [],
       nameList: 'categoryFood',
-      categoryFoodId: null,
+      categoryfood: null,
       isFilter: false,
     };
     this.onReloadData();
@@ -34,13 +34,13 @@ class Main extends Component {
 
   onBackCategoryFood() {
     queryAllCategoryFood()
-    .then(listData => this.setState({ listData, nameList: 'categoryFood', categoryFoodId: null, search: '', isFilter: false }))
+    .then(listData => this.setState({ listData, nameList: 'categoryFood', categoryfood: null, search: '', isFilter: false }))
     .catch(error => this.setState({ listData: [] }));
   }
 
-  onNavigationFood(categoryFoodId) {
-    filterFoodByCategoryFoodId(categoryFoodId)
-    .then(listData => this.setState({ listData, nameList: 'food', categoryFoodId, isFilter: false }))
+  onNavigationFood(categoryfood) {
+    filterFoodByCategoryFoodId(categoryfood.id)
+    .then(listData => this.setState({ listData, nameList: 'food', categoryfood, isFilter: false }))
     .catch(error => this.setState({ listData: [] }));
   }
 
@@ -49,13 +49,13 @@ class Main extends Component {
   }
 
   onReloadData() {
-    const { listData, nameList, categoryFoodId } = this.state;
+    const { listData, nameList, categoryfood } = this.state;
     if(nameList === 'categoryFood') {
       queryAllCategoryFood()
       .then(listData => this.setState({ listData }))
       .catch(error => this.setState({ listData: [] }));
     } else {
-      filterFoodByCategoryFoodId(categoryFoodId)
+      filterFoodByCategoryFoodId(categoryfood.id)
       .then(listData => this.setState({ listData }))
       .catch(error => this.setState({ listData: [] }));
     }
@@ -152,14 +152,14 @@ class Main extends Component {
   }
 
   render() {
-    const { listData, nameList } = this.state;
-    const { container, wrapListData, headerBack, btnBack, txtBack } = styles;
+    const { listData, nameList, categoryfood } = this.state;
+    const { container, headerBack, btnBack, imageStyle, txtBack } = styles;
 
     console.log("nameList", nameList);
     const MainView = nameList == 'categoryFood' ?
     <FlatListCategoryFood 
       listCategoryFood={listData}
-      onNavigationFood={categoryFoodId => this.onNavigationFood(categoryFoodId)}
+      onNavigationFood={categoryFood => this.onNavigationFood(categoryFood)}
     /> 
     : 
     <FlatListFood
@@ -167,6 +167,7 @@ class Main extends Component {
       onIncrease={foodId => this.onIncrease(foodId)}
       onDecrease={foodId => this.onDecrease(foodId)}
       onInsertOrder={food => this.onInsertOrder(food)}
+      onBackCategoryFood={() => this.onBackCategoryFood()}
     />
 
     return (
@@ -184,7 +185,9 @@ class Main extends Component {
                 style={btnBack}
                 onPress={() => this.onBackCategoryFood()}
             >
-              <Image source={require('./../../../Media/Icon/left.png')} />
+              <Image source={require('./../../../Media/Icon/left.png')} 
+              style={imageStyle}/>
+              <Text style={txtBack}>{categoryfood.name}</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -217,19 +220,26 @@ export default connect(mapStatetoProps)(Main);
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor:'white',
     flex: 1
   },
   // ---> Header Back <---
   headerBack: {
-    height: height / 12,
-  },
-  btnBack: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    padding: 10
-  },
-  txtBack: {
-    fontSize: 20
-  },
+		padding:10
+	},
+	btnBack: {
+		flexDirection: 'row',
+		alignItems: 'center',
+	},
+	txtBack: {
+		marginLeft:10,
+		fontSize:28,
+		color: 'black',
+		fontWeight:'bold'
+	},
+	imageStyle:{
+		resizeMode:'center',
+		width:height/30,
+		height:height/30,
+	}
 });

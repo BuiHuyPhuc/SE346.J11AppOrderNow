@@ -3,6 +3,7 @@ import {
 	StyleSheet, View, Text, TouchableOpacity, TextInput, Image, Alert
 } from 'react-native';
 import Dialog, { DialogTitle } from 'react-native-popup-dialog';
+import ImagePicker from 'react-native-image-picker';
 
 import { insertNewCategoryFood, updateCategoryFood, deleteCategoryFood } from './../../../../Database/All_Schemas';
 
@@ -11,14 +12,39 @@ import { onCancelPopup, onClickUpdate } from './../../../../Redux/ActionCreators
 
 import linkImageDefault from './../../../../Api/LinkImageDefault';
 
-//let monnuongIcon = require('./../../../../Media/Category/mon-nuong.png');
+const options = {
+  title: 'Select Avatar',
+  storageOptions: {
+    skipBackup: true,
+    path: 'images',
+  },
+};
 
 class PopUpCategoryFood extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			name: ''
+			name: '',
+			sourceImage: ''
 		};
+	}
+
+	onImagePicker() {
+		ImagePicker.showImagePicker(options, (response) => {
+			if (response.didCancel) {
+			} else if (response.error) {
+			} else if (response.customButton) {
+			} else {
+				const source = response.uri;
+		
+				// You can also display the image using data:
+				// const source = { uri: 'data:image/jpeg;base64,' + response.data };
+		
+				this.setState({
+					sourceImage: source,
+				});
+			}
+		});
 	}
 
 	onAdd(newCategoryFood) {
@@ -64,7 +90,7 @@ class PopUpCategoryFood extends Component {
 	}
 
 	render() {
-		const { name } = this.state;
+		const { name, sourceImage } = this.state;
 		const { title, categoryFood, isSave, isUpdate, visible,
 				onCancelPopup, onClickUpdate } = this.props;
 		const { wrapUpdate_Delete, btnFeature,
@@ -91,7 +117,7 @@ class PopUpCategoryFood extends Component {
 			<Dialog
 				dialogTitle={<DialogTitle title={title} />}
 				width={0.8} height={isUpdate ? 300 : 250 }
-				onShow={() => categoryFood == null ? this.setState({ name: '' }) : this.setState({ name: categoryFood.name })}
+				onShow={() => categoryFood == null ? this.setState({ name: '', sourceImage: '' }) : this.setState({ name: categoryFood.name, sourceImage: categoryFood.image })}
 				visible={visible}
 			>
 				{isUpdate ? btnUpdate_delete : null}
@@ -109,13 +135,13 @@ class PopUpCategoryFood extends Component {
 						<View style={wrapBtnImage}>
 							<TouchableOpacity
 								style={wrapBtn}
-								onPress={() => {}}
+								onPress={() => this.onImagePicker()}
 							>
 								<Text style={btnText}>Chọn ảnh</Text>
 							</TouchableOpacity>
 							<Image 
 								style={imgLoaiMon}
-								source={{uri: linkImageDefault}}
+								source={sourceImage == '' ? {uri: linkImageDefault} : {uri: sourceImage}}
 							/>
 						</View>
 					</View>
@@ -125,8 +151,8 @@ class PopUpCategoryFood extends Component {
 							style={wrapBtn}
 							disabled={!isSave}
 							onPress={() => isUpdate ? 
-								this.onUpdate({ id: categoryFood.id, name, image: '' }) : 
-								this.onAdd({ name, image: '' })
+								this.onUpdate({ id: categoryFood.id, name, image: sourceImage }) : 
+								this.onAdd({ name, image: sourceImage })
 							}
 						>
 							<Text style={btnText}>Save</Text>

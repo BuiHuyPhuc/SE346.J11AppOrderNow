@@ -30,71 +30,82 @@ export default class BillDetail extends Component {
 
   onReloadData() {
     filterFoodByTable(this.props.navigation.state.params.table)
-    .then(listFinishFood => this.setState({ listFinishFood }))
-    .catch(error => this.setState({ listFinishFood: [] }));
+      .then(listFinishFood => this.setState({ listFinishFood }))
+      .catch(error => this.setState({ listFinishFood: [] }));
   }
 
   onUnfinishedFood(item) {
     updateStatusBillDetail(item.billDetail, false)
-    .then(() => alert(`${item.food.name} chưa hoàn thành`))
-    .catch(error => alert('Món ăn bị lỗi!'));
+      .catch(error => alert('Món ăn bị lỗi!'));
+  }
+
+  onFinishedFood(item) {
+    updateStatusBillDetail(item.billDetail, true)
+      .catch(error => alert('Món ăn bị lỗi'));
   }
 
   render() {
     const { listFinishFood } = this.state;
-    const { navigation } = this.props;
-    const { container, wrapHeaderTable, headerTen, headerDonGia, headerSoLuong, headerTriGia, txtHeader,
-            wrapItem, btnCheck, txtTen, txtDonGia, txtSoLuong, txtTriGia 
-          } = styles;
+    const { navigation} = this.props;
+    const { table } = this.props.navigation.state.params;
+    const { container, headerTable, headerWrapTrangThai, headerWrapTen, headerWrapSoLuong, headerWrapDonGia,
+      headerWrapTriGia, txtHeader, textItem,
+      wrapItem, btnCheck, imageStyle, txtTen, txtSoLuong, txtDonGia, txtTriGia
+    } = styles;
     return (
       <View style={container}>
-        <HeaderBack 
-          navigation={navigation}
-          name="Bill Detail tên bàn"
-        />
+        <HeaderBack
+					navigation={navigation}
+					name={"Bàn " + table}
+				/>
 
-        <View style={wrapHeaderTable}>
-          <View style={headerTen}>
-            <Text style={txtHeader}>Tên món</Text>    
+        <View style={{ margin: 10, paddingVertical: 10, backgroundColor: 'white', elevation: 3, borderRadius: 5 }}>
+          <View style={headerTable}>
+            <View style={headerWrapTrangThai}>
+              <Text style={txtHeader}></Text>
+            </View>
+            <View style={headerWrapTen}>
+              <Text style={txtHeader}>Tên món</Text>
+            </View>
+            <View style={headerWrapDonGia}>
+              <Text style={txtHeader}>Đơn giá</Text>
+            </View>
+            <View style={headerWrapSoLuong}>
+              <Text style={txtHeader}>SL</Text>
+            </View>
+            <View style={headerWrapTriGia}>
+              <Text style={txtHeader}>Trị giá</Text>
+            </View>
           </View>
-          <View style={headerDonGia}>
-            <Text style={txtHeader}>Đơn giá</Text>      
-          </View>
-          <View style={headerSoLuong}>
-            <Text style={txtHeader}>Số lượng</Text>              
-          </View> 
-          <View style={headerTriGia}>
-            <Text style={txtHeader}>Trị giá</Text>              
-          </View>           
+
+          <FlatList
+            data={listFinishFood}
+            renderItem={({ item }) =>
+              <View style={wrapItem}>
+                <TouchableOpacity
+                  style={btnCheck}
+                  onPress={() => item.billDetail.status ? this.onUnfinishedFood(item) : this.onFinishedFood(item)}
+                >
+                  <Image style={imageStyle} source={item.billDetail.status ? checkActiveIcon : checkInactiveIcon}></Image>
+                </TouchableOpacity>
+                <View style={txtTen}>
+                  <Text style={textItem}>{item.food.name}</Text>
+                </View>
+                <View style={txtDonGia}>
+                  <Text style={textItem}>{item.food.price.getFormattedMoney(0)}</Text>
+                </View>
+                <View style={txtSoLuong}>
+                  <Text style={textItem}>{item.billDetail.quantity}</Text>
+                </View>
+                <View style={txtTriGia}>
+                  <Text style={textItem}>{(item.food.price * item.billDetail.quantity).getFormattedMoney(0)}</Text>
+                </View>
+              </View>
+            }
+            keyExtractor={item => item.billDetail.id.toString()}
+          />
         </View>
 
-
-        <FlatList
-          data={listFinishFood}
-          renderItem={({item}) => 
-            <View style={wrapItem}>
-              <TouchableOpacity
-                style={btnCheck}
-                onPress={() => item.billDetail.status ? this.onUnfinishedFood(item) : {}}
-              >
-                <Image source={item.billDetail.status ? checkActiveIcon : checkInactiveIcon}></Image>
-              </TouchableOpacity>
-              <View style={txtTen}>
-                <Text>{item.food.name}</Text>
-              </View>              
-              <View style={txtDonGia}>
-                <Text>{item.food.price.getFormattedMoney(0)}</Text>
-              </View>              
-              <View style={txtSoLuong}>
-                <Text >{item.billDetail.quantity}</Text>
-              </View>
-              <View style={txtTriGia}>                            
-              <Text>{(item.food.price * item.billDetail.quantity).getFormattedMoney(0)}</Text>
-              </View>
-            </View>  
-          }
-          keyExtractor={item => item.billDetail.id.toString()}
-        />
       </View>
     );
   }
@@ -103,39 +114,53 @@ export default class BillDetail extends Component {
     isMouted = true;
 
     realm.addListener('change', () => {
-      if(isMouted)
-        this.onReloadData();           
+      if (isMouted)
+        this.onReloadData();
     });
   }
 }
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: 'white',
     flex: 1
   },
   // ---> Table Header <---
-  wrapHeaderTable: {
+  headerTable: {
     flexDirection: 'row',
-    paddingHorizontal: 5,
-    marginTop: 20
+    margin: 10
   },
-  headerTen: { flex: 2, justifyContent: 'center', alignItems: 'center' },
-  headerDonGia: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  headerSoLuong: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  headerTriGia: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  headerWrapTrangThai: { flex: 1, justifyContent: 'center' },
+  headerWrapTen: { flex: 4, justifyContent: 'center' },
+  headerWrapDonGia: { flex: 2, justifyContent: 'center' },
+  headerWrapSoLuong: { flex: 1, justifyContent: 'center' },
+  headerWrapTriGia: { flex: 2, justifyContent: 'center' },
   txtHeader: {
-    fontWeight: 'bold'
+    color: '#fe5644',
+    fontWeight: 'bold',
+    fontSize: 16
   },
   // ---> Table Item <---
-  wrapItem: { 
+  wrapItem: {
     flexDirection: 'row',
-    paddingHorizontal: 5,
-    marginTop: 5, 
-    alignItems: 'center' 
+    margin: 10,
+    alignItems: 'flex-start'
   },
-  btnCheck: { flex: 2 },
-  txtTen: { flex: 8, marginHorizontal: 5 },
-  txtDonGia: { flex: 5, alignItems: 'center' },
-  txtSoLuong: { flex: 5, alignItems: 'center' },
-  txtTriGia: { flex: 5, alignItems: 'center' }
+  btnCheck: {
+    flex: 1,
+  },
+  imageStyle: {
+    width: 20,
+    height: 20,
+    resizeMode: 'center',
+  },
+  txtTen: { flex: 4 },
+  txtDonGia: { flex: 2 },
+  txtSoLuong: { flex: 1 },
+  txtTriGia: { flex: 2 },
+  txtItem: {
+    color: 'black',
+    flexWrap: 'wrap',
+    fontSize: 14
+  },
 });

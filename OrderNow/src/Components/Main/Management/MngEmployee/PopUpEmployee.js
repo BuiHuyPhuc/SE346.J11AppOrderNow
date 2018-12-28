@@ -3,6 +3,7 @@ import {
 	StyleSheet, View, Text, TouchableOpacity, TextInput, Image, Alert, Picker
 } from 'react-native';
 import Dialog, { DialogTitle } from 'react-native-popup-dialog';
+import ImagePicker from 'react-native-image-picker';
 
 import { insertNewEmployee, updateEmployee, deleteEmployee } from './../../../../Database/All_Schemas';
 
@@ -10,6 +11,13 @@ import { connect } from 'react-redux';
 import { onCancelPopup, onClickUpdate } from './../../../../Redux/ActionCreators';
 
 let profileIcon = require('./../../../../Media/Temp/profile.png');
+const options = {
+	title: 'Select Avatar',
+	storageOptions: {
+	  skipBackup: true,
+	  path: 'images',
+	},
+  };
 
 class PopUpEmployee extends Component {
 	constructor(props) {
@@ -19,8 +27,27 @@ class PopUpEmployee extends Component {
 			password: '',
 			name: '',
 			listPosition: ['Nhân viên', 'Quản lý'],
-			selectedPositon: 'Nhân viên'
+			selectedPositon: 'Nhân viên',
+			image: ''
 		};
+	}
+
+	onImagePicker() {
+		ImagePicker.showImagePicker(options, (response) => {
+			if (response.didCancel) {
+			} else if (response.error) {
+			} else if (response.customButton) {
+			} else {
+				const source = response.uri;
+		
+				// You can also display the image using data:
+				// const source = { uri: 'data:image/jpeg;base64,' + response.data };
+		
+				this.setState({
+					image: source,
+				});
+			}
+		});
 	}
 
 	onAdd(newEmployee) {
@@ -71,7 +98,7 @@ class PopUpEmployee extends Component {
 	}
 
 	render() {
-		const { username, password, name, listPosition, selectedPositon } = this.state;
+		const { username, password, name, listPosition, selectedPositon, image } = this.state;
 		const { title, employee, isSave, isUpdate, visible,
 				onCancelPopup, onClickUpdate } = this.props;
 		const { wrapUpdate_Delete, btnFeature, wrapDialog, textInput, cmbPosition, 
@@ -98,8 +125,8 @@ class PopUpEmployee extends Component {
 			<Dialog
 				dialogTitle={<DialogTitle title={title} />}
 				width={0.8} height={isUpdate ? 460 : 410 }
-				onShow={() => employee == null ? this.setState({ username: '', password: '', name: '' }) : 
-					this.setState({ username: employee.username, password: employee.password, name: employee.name, selectedPositon: employee.position })}
+				onShow={() => employee == null ? this.setState({ username: '', password: '', name: '', image: '' }) : 
+					this.setState({ username: employee.username, password: employee.password, name: employee.name, selectedPositon: employee.position, image: employee.image })}
 				visible={visible}
 			>
 			
@@ -148,13 +175,13 @@ class PopUpEmployee extends Component {
 						<View style={wrapBtnImage}>
 							<TouchableOpacity
 								style={wrapBtn}
-								onPress={() => {}}
+								onPress={() => this.onImagePicker()}
 							>
 								<Text style={btnText}>Chọn ảnh</Text>
 							</TouchableOpacity>
 							<Image 
 								style={imgProfile}
-								source={profileIcon}
+								source={image == '' ? profileIcon : {uri: image}}
 							/>
 						</View>
 					</View>

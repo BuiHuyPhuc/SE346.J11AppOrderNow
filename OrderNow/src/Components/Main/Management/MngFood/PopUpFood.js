@@ -3,6 +3,7 @@ import {
 	StyleSheet, View, Text, TouchableOpacity, TextInput, Image, Alert, Picker
 } from 'react-native';
 import Dialog, { DialogTitle } from 'react-native-popup-dialog';
+import ImagePicker from 'react-native-image-picker';
 
 import { queryAllCategoryFood, insertNewFood, updateFood, deleteFood } from './../../../../Database/All_Schemas';
 
@@ -11,7 +12,13 @@ import { onCancelPopup, onClickUpdate } from './../../../../Redux/ActionCreators
 
 import linkImageDefault from './../../../../Api/LinkImageDefault';
 
-//let monnuongIcon = require('./../../../../Media/Category/mon-nuong.png');
+const options = {
+	title: 'Select Avatar',
+	storageOptions: {
+	  skipBackup: true,
+	  path: 'images',
+	},
+  };
 
 class PopUpFood extends Component {
 	constructor(props) {
@@ -20,7 +27,8 @@ class PopUpFood extends Component {
 			listCategoryFood: [],
 			name: '',
 			price: '',
-			selectedCategoryFoodId: null
+			selectedCategoryFoodId: null,
+			sourceImage: ''
 		};
 		this.onLoadListCategoryFood();		
 	}
@@ -32,6 +40,24 @@ class PopUpFood extends Component {
 	    	listCategoryFood.slice(0, 1).map(e => this.setState({ selectedCategoryFoodId: e.id }));
 	    })
 	    .catch(error => this.setState({ listCategoryFood: [] }));
+	}
+
+	onImagePicker() {
+		ImagePicker.showImagePicker(options, (response) => {
+			if (response.didCancel) {
+			} else if (response.error) {
+			} else if (response.customButton) {
+			} else {
+				const source = response.uri;
+		
+				// You can also display the image using data:
+				// const source = { uri: 'data:image/jpeg;base64,' + response.data };
+		
+				this.setState({
+					sourceImage: source,
+				});
+			}
+		});
 	}
 
 	onAdd(newFood) {
@@ -79,7 +105,7 @@ class PopUpFood extends Component {
 	}
 
 	render() {
-		const { listCategoryFood, name, price, selectedCategoryFoodId } = this.state;
+		const { listCategoryFood, name, price, selectedCategoryFoodId, sourceImage } = this.state;
 		const { title, food, isSave, isUpdate, visible, chooseCategoryFoodId,
 				onCancelPopup, onClickUpdate } = this.props;
 		const { wrapUpdate_Delete, btnFeature, wrapDialog, textInput, cmbCategoryFood, 
@@ -106,9 +132,10 @@ class PopUpFood extends Component {
 			<Dialog
 				dialogTitle={<DialogTitle title={title} />}
 				width={0.8} height={isUpdate ? 400 : 350}
-				onShow={() => food == null ? this.setState({ name: '', price: '' }) : this.setState({ 
+				onShow={() => food == null ? this.setState({ name: '', price: '', sourceImage: '' }) : this.setState({ 
 					name: food.name,
 					price: food.price.toString(),
+					sourceImage: food.image,
 					selectedCategoryFoodId: food.idCategoryFood
 				})}
 				visible={visible}
@@ -154,7 +181,7 @@ class PopUpFood extends Component {
 							</TouchableOpacity>
 							<Image 
 								style={imgLoaiMon}
-								source={{uri: linkImageDefault}}
+								source={sourceImage == '' ? {uri: linkImageDefault} : {uri: sourceImage}}
 							/>
 						</View>
 					</View>
@@ -164,8 +191,8 @@ class PopUpFood extends Component {
 							style={wrapBtn}
 							disabled={!isSave}
 							onPress={() => isUpdate ?
-								this.onUpdate({ id:food.id , name, price: parseInt(price), image: '', idCategoryFood: selectedCategoryFoodId }) :
-								this.onAdd({ name, price, image: '', idCategoryFood: selectedCategoryFoodId })
+								this.onUpdate({ id:food.id , name, price: parseInt(price), image: sourceImage, idCategoryFood: selectedCategoryFoodId }) :
+								this.onAdd({ name, price, image: sourceImage, idCategoryFood: selectedCategoryFoodId })
 							}
 						>
 							<Text style={btnText}>Save</Text>

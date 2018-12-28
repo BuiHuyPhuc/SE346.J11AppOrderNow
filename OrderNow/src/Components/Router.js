@@ -93,14 +93,14 @@ export const MainTabbarNV = createBottomTabNavigator({
     }),
 	tabBarOptions: {
 		style: {
-			height: height / 12,
-			backgroundColor: '#F8F8F8',
+			height: height / 14,
+			backgroundColor: 'whitesmoke',
 		},
 		labelStyle: {
     		fontSize: 12
 		},
-		inactiveTintColor: '#B0B0B0',
-		activeTintColor: '#2ABB9C',
+		inactiveTintColor: '#c1c1c1',
+		activeTintColor: '#fe5644',
 		showIcon: true
 	},
 	animationEnabled: true,
@@ -134,14 +134,15 @@ export const MainTabbarQL = createBottomTabNavigator({
     }),
 	tabBarOptions: {
 		style: {
-			height: height / 12,
-			backgroundColor: '#F8F8F8',
+			height: height / 14,
+			backgroundColor: 'whitesmoke',
 		},
 		labelStyle: {
     		fontSize: 12
 		},
-		inactiveTintColor: '#B0B0B0',
-		activeTintColor: '#2ABB9C',
+		showLabel: false,
+		inactiveTintColor: '#c1c1c1',
+		activeTintColor: '#fe5644',
 		showIcon: true
 	},
 	animationEnabled: true,

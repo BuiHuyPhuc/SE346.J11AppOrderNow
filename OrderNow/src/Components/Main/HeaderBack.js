@@ -7,7 +7,7 @@ const { width, height } = Dimensions.get("window");
 
 export default class HeaderBack extends Component {
 	render() {
-		const { headerBack, btnBack, txtBack } = Styles;
+		const { headerBack, btnBack, txtBack, imageStyle } = Styles;
 		const { navigation, name } = this.props;
 		return (
 			<View style={headerBack}>
@@ -15,7 +15,8 @@ export default class HeaderBack extends Component {
 		          	style={btnBack}
 		          	onPress={() => navigation.goBack()}
 		        >
-		        	<Image source={require('./../../Media/Icon/left.png')} />
+		        	<Image source={require('./../../Media/Icon/left.png')} 
+					style={imageStyle}/>
 	            	<Text style={txtBack}>{name}</Text>
 		            <View />
 		        </TouchableOpacity>
@@ -26,15 +27,21 @@ export default class HeaderBack extends Component {
 
 const Styles = StyleSheet.create({
 	headerBack: {
-		height: height / 12,
+		padding:10
 	},
 	btnBack: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		justifyContent: 'space-between',
-		padding: 10
 	},
 	txtBack: {
-		fontSize: 20
+		marginLeft:10,
+		fontSize:28,
+		color: 'black',
+		fontWeight:'bold'
+	},
+	imageStyle:{
+		resizeMode:'center',
+		width:height/30,
+		height:height/30,
 	}
 });
